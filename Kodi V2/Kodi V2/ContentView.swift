@@ -95,7 +95,7 @@ struct ContentView: View {
 
                 Spacer()
 
-                // Bottom - Media Controls (Back, Play, Pause, Stop)
+                // Bottom - Media Controls (Back, Play, Pause, Stop, Fast Forward, Rewind)
                 HStack(spacing: 30) {
                     // Back button
                     Button(action: {
@@ -106,12 +106,30 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
+                    // Rewind button
+                    Button(action: {
+                        kodiClient.rewind()
+                    }) {
+                        Image(systemName: "gobackward")
+                            .font(.system(size: 28))
+                            .foregroundColor(.gray)
+                    }
+
                     // Play/Pause button that toggles icon based on play state
                     Button(action: {
                         kodiClient.playPause()
                         isPlaying.toggle()
                     }) {
                         Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(.gray)
+                    }
+
+                    // Fast Forward button
+                    Button(action: {
+                        kodiClient.fastForward()
+                    }) {
+                        Image(systemName: "goforward")
                             .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }

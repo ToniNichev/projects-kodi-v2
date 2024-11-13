@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 class KodiClient: ObservableObject {
-    @Published var kodiIP: String = "192.168.1.109" // replace with your Kodi IP
+    @Published var kodiIP: String = "192.168.1.207" // replace with your Kodi IP
     private let port = 8080
 
     enum Direction: String {
@@ -52,6 +52,20 @@ class KodiClient: ObservableObject {
     func stop() {
         sendRequest(method: "Player.Stop", params: ["playerid": 1]) { result in
             self.printResult(result, action: "Stop")
+        }
+    }
+
+    func fastForward() {
+        // Seek forward by 30 seconds
+        sendRequest(method: "Player.Seek", params: ["playerid": 1, "value": ["seconds": 30]]) { result in
+            self.printResult(result, action: "Fast Forward")
+        }
+    }
+
+    func rewind() {
+        // Seek backward by 30 seconds
+        sendRequest(method: "Player.Seek", params: ["playerid": 1, "value": ["seconds": -30]]) { result in
+            self.printResult(result, action: "Rewind")
         }
     }
 
