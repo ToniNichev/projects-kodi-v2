@@ -1,7 +1,18 @@
 import SwiftUI
+import Foundation
+
+// Wrapper struct for error message, conforming to Identifiable
+struct ErrorMessage: Identifiable {
+    let id = UUID()
+    let message: String
+}
+
+// MARK: - Kodi Remote Control SwiftUI App
 
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
+    @State private var isPlaying = false // State variable to track play/pause
+    @State private var errorMessage: ErrorMessage? // State for error message
 
     var body: some View {
         ZStack {
@@ -20,12 +31,12 @@ struct ContentView: View {
                             .padding()
                     }
                 }
-                
+
                 Spacer()
 
                 // Up Button
                 Button(action: {
-                    kodiClient.navigate(direction: "Up")
+                    kodiClient.navigate(direction: .up)
                 }) {
                     Image(systemName: "chevron.up")
                         .font(.system(size: 36))
@@ -37,7 +48,7 @@ struct ContentView: View {
                 HStack {
                     // Left button
                     Button(action: {
-                        kodiClient.navigate(direction: "Left")
+                        kodiClient.navigate(direction: .left)
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 36))
@@ -61,7 +72,7 @@ struct ContentView: View {
 
                     // Right button
                     Button(action: {
-                        kodiClient.navigate(direction: "Right")
+                        kodiClient.navigate(direction: .right)
                     }) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 36))
@@ -73,7 +84,7 @@ struct ContentView: View {
 
                 // Down Button
                 Button(action: {
-                    kodiClient.navigate(direction: "Down")
+                    kodiClient.navigate(direction: .down)
                 }) {
                     Image(systemName: "chevron.down")
                         .font(.system(size: 36))
@@ -94,24 +105,12 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Play button
+                    // Play/Pause button that toggles icon based on play state
                     Button(action: {
-                        kodiClient.sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
-                            printResult(result, action: "Play")
-                        }
+                        kodiClient.playPause()
+                        isPlaying.toggle()
                     }) {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-
-                    // Pause button
-                    Button(action: {
-                        kodiClient.sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
-                            printResult(result, action: "Pause")
-                        }
-                    }) {
-                        Image(systemName: "pause.fill")
+                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }
@@ -127,7 +126,10 @@ struct ContentView: View {
                 }
                 .padding(.bottom, 40)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 120)
+        }
+        .alert(item: $errorMessage) { message in
+            Alert(title: Text("Error"), message: Text(message.message), dismissButton: .default(Text("OK")))
         }
     }
     
@@ -136,7 +138,7 @@ struct ContentView: View {
         case .success:
             print("\(action) Success")
         case .failure(let error):
-            print("Error: \(error)")
+            errorMessage = ErrorMessage(message: "\(action) Error: \(error.localizedDescription)")
         }
     }
 }
