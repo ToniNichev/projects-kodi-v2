@@ -4,82 +4,141 @@ struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Kodi Remote")
-                .font(.largeTitle)
-                .padding()
+        ZStack {
+            Color.white.ignoresSafeArea() // Light background for a modern, clean look
 
-            // Directional Controls
             VStack {
-                Button(action: {
-                    kodiClient.navigate(direction: "Up")
-                }) {
-                    Image(systemName: "chevron.up.circle.fill")
-                        .font(.largeTitle)
-                }
-
+                // Top - Up Button and Info
                 HStack {
-                    Button(action: {
-                        kodiClient.navigate(direction: "Left")
-                    }) {
-                        Image(systemName: "chevron.left.circle.fill")
-                            .font(.largeTitle)
-                    }
-
+                    Spacer()
                     Button(action: {
                         kodiClient.showInfo()
                     }) {
                         Image(systemName: "info.circle.fill")
-                            .font(.largeTitle)
+                            .font(.system(size: 30))
+                            .foregroundColor(.gray)
+                            .padding()
+                    }
+                }
+
+                Spacer()
+
+                // Up Button
+                Button(action: {
+                    kodiClient.navigate(direction: "Up")
+                }) {
+                    Image(systemName: "chevron.up.circle.fill")
+                        .font(.system(size: 50))
+                        .foregroundColor(.gray)
+                }
+                .padding(.bottom, 30)
+
+                // Center Row - Left, OK, Right
+                HStack {
+                    // Left button
+                    Button(action: {
+                        kodiClient.navigate(direction: "Left")
+                    }) {
+                        Image(systemName: "chevron.left.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
                     }
 
+                    Spacer()
+
+                    // OK button in the center
+                    Button(action: {
+                        kodiClient.sendRequest(method: "Input.Select") { result in
+                            printResult(result, action: "OK")
+                        }
+                    }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                    }
+
+                    Spacer()
+
+                    // Right button
                     Button(action: {
                         kodiClient.navigate(direction: "Right")
                     }) {
                         Image(systemName: "chevron.right.circle.fill")
-                            .font(.largeTitle)
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
                     }
                 }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 30)
 
+                // Down Button
                 Button(action: {
                     kodiClient.navigate(direction: "Down")
                 }) {
                     Image(systemName: "chevron.down.circle.fill")
-                        .font(.largeTitle)
+                        .font(.system(size: 50))
+                        .foregroundColor(.gray)
                 }
+                .padding(.bottom, 50)
+
+                Spacer()
+
+                // Bottom - Media Controls (Back, Play, Pause, Stop)
+                HStack(spacing: 40) {
+                    // Back button
+                    Button(action: {
+                        kodiClient.back()
+                    }) {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.gray)
+                    }
+
+                    // Play button
+                    Button(action: {
+                        kodiClient.sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
+                            printResult(result, action: "Play")
+                        }
+                    }) {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray)
+                    }
+
+                    // Pause button
+                    Button(action: {
+                        kodiClient.sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
+                            printResult(result, action: "Pause")
+                        }
+                    }) {
+                        Image(systemName: "pause.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray)
+                    }
+
+                    // Stop button
+                    Button(action: {
+                        kodiClient.stop()
+                    }) {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.bottom, 30)
             }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
-
-            // Media Controls
-            HStack(spacing: 30) {
-                Button(action: {
-                    kodiClient.back()
-                }) {
-                    Label("Back", systemImage: "arrow.uturn.backward.circle.fill")
-                        .font(.title2)
-                }
-
-                Button(action: {
-                    kodiClient.playPause()
-                }) {
-                    Label("Play/Pause", systemImage: "playpause.fill")
-                        .font(.title2)
-                }
-
-                Button(action: {
-                    kodiClient.stop()
-                }) {
-                    Label("Stop", systemImage: "stop.fill")
-                        .font(.title2)
-                }
-            }
-            .padding()
         }
-        .padding()
+    }
+    
+    private func printResult(_ result: Result<Data, Error>, action: String) {
+        switch result {
+        case .success:
+            print("\(action) Success")
+        case .failure(let error):
+            print("Error: \(error)")
+        }
     }
 }
-
 
 #Preview {
     ContentView()
