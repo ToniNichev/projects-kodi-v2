@@ -5,33 +5,33 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea() // Light background for a modern, clean look
+            Color.white.ignoresSafeArea() // Plain white background for a minimal look
 
             VStack {
-                // Top - Up Button and Info
+                // Top Info Button
                 HStack {
                     Spacer()
                     Button(action: {
                         kodiClient.showInfo()
                     }) {
-                        Image(systemName: "info.circle.fill")
-                            .font(.system(size: 30))
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 24))
                             .foregroundColor(.gray)
                             .padding()
                     }
                 }
-
+                
                 Spacer()
 
                 // Up Button
                 Button(action: {
                     kodiClient.navigate(direction: "Up")
                 }) {
-                    Image(systemName: "chevron.up.circle.fill")
-                        .font(.system(size: 50))
+                    Image(systemName: "chevron.up")
+                        .font(.system(size: 36))
                         .foregroundColor(.gray)
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 20)
 
                 // Center Row - Left, OK, Right
                 HStack {
@@ -39,8 +39,8 @@ struct ContentView: View {
                     Button(action: {
                         kodiClient.navigate(direction: "Left")
                     }) {
-                        Image(systemName: "chevron.left.circle.fill")
-                            .font(.system(size: 50))
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 36))
                             .foregroundColor(.gray)
                     }
 
@@ -52,8 +52,8 @@ struct ContentView: View {
                             printResult(result, action: "OK")
                         }
                     }) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 50))
+                        Image(systemName: "circle")
+                            .font(.system(size: 36))
                             .foregroundColor(.gray)
                     }
 
@@ -63,34 +63,34 @@ struct ContentView: View {
                     Button(action: {
                         kodiClient.navigate(direction: "Right")
                     }) {
-                        Image(systemName: "chevron.right.circle.fill")
-                            .font(.system(size: 50))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 36))
                             .foregroundColor(.gray)
                     }
                 }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 30)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
 
                 // Down Button
                 Button(action: {
                     kodiClient.navigate(direction: "Down")
                 }) {
-                    Image(systemName: "chevron.down.circle.fill")
-                        .font(.system(size: 50))
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 36))
                         .foregroundColor(.gray)
                 }
-                .padding(.bottom, 50)
+                .padding(.top, 20)
 
                 Spacer()
 
                 // Bottom - Media Controls (Back, Play, Pause, Stop)
-                HStack(spacing: 40) {
+                HStack(spacing: 30) {
                     // Back button
                     Button(action: {
                         kodiClient.back()
                     }) {
-                        Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .font(.system(size: 30))
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }
 
@@ -100,8 +100,8 @@ struct ContentView: View {
                             printResult(result, action: "Play")
                         }
                     }) {
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 40))
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }
 
@@ -111,8 +111,8 @@ struct ContentView: View {
                             printResult(result, action: "Pause")
                         }
                     }) {
-                        Image(systemName: "pause.circle.fill")
-                            .font(.system(size: 40))
+                        Image(systemName: "pause.fill")
+                            .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }
 
@@ -120,13 +120,14 @@ struct ContentView: View {
                     Button(action: {
                         kodiClient.stop()
                     }) {
-                        Image(systemName: "stop.circle.fill")
-                            .font(.system(size: 30))
+                        Image(systemName: "stop.fill")
+                            .font(.system(size: 28))
                             .foregroundColor(.gray)
                     }
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 40)
             }
+            .padding(.horizontal, 20)
         }
     }
     
