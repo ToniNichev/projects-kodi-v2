@@ -1,0 +1,73 @@
+# macOS
+.DS_Store
+
+# Swift Package Manager
+/.build/
+/Packages
+
+# Xcode
+DerivedData/
+.idea/
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata
+*.xcworkspace
+*.xcodeproj/*.xcuserdatad
+*.xcodeproj/*.xcuserdatad/*
+*.xcodeproj/xcuserdata
+*.xcodeproj/project.xcworkspace
+
+# Swift Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Carthage
+Carthage/Build
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Accio dependency manager
+Dependencies/
+.accio/
+
+# Xcode Archives
+*.xcarchive
+
+# App build artifacts
+*.ipa
+*.app
+*.dSYM
+*.log
+
+# Realm
+*.realm
+*.realm.lock
+
+# SwiftPM
+*.llbuild
+.swiftpm/xcode/
+.swiftpm/repositories/
+Package.resolved
+
+# Tuist
+/.tuist-version
+
+# SwiftLint
+.swiftlint.yml
+
+# Coverage
+*.xcresult
+
+# Custom user settings
+xcuserdata/
+

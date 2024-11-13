@@ -1,7 +1,8 @@
 import Foundation
+import SwiftUI
 
 class KodiClient: ObservableObject {
-    @Published var kodiIP: String = "10.0.1.119" // replace with your Kodi IP
+    @Published var kodiIP: String = "192.168.1.109" // replace with your Kodi IP
     private let port = 8080
 
     enum Direction: String {
@@ -44,23 +45,13 @@ class KodiClient: ObservableObject {
 
     func playPause() {
         sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
-            switch result {
-            case .success(let data):
-                print("Play/Pause Success: \(data)")
-            case .failure(let error):
-                print("Error: \(error)")
-            }
+            self.printResult(result, action: "Play/Pause")
         }
     }
 
     func stop() {
         sendRequest(method: "Player.Stop", params: ["playerid": 1]) { result in
-            switch result {
-            case .success(let data):
-                print("Stop Success: \(data)")
-            case .failure(let error):
-                print("Error: \(error)")
-            }
+            self.printResult(result, action: "Stop")
         }
     }
 
@@ -89,6 +80,12 @@ class KodiClient: ObservableObject {
             print("\(action) Success: \(data)")
         case .failure(let error):
             print("\(action) Error: \(error)")
+            NotificationCenter.default.post(name: .sendRequestFailed, object: nil, userInfo: ["error": error.localizedDescription])
         }
     }
+}
+
+// Notification for sendRequest failure
+extension Notification.Name {
+    static let sendRequestFailed = Notification.Name("sendRequestFailed")
 }

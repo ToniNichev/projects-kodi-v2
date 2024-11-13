@@ -13,6 +13,7 @@ struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
     @State private var isPlaying = false // State variable to track play/pause
     @State private var errorMessage: ErrorMessage? // State for error message
+    @State private var showHelpAlert = false // State for showing help alert
 
     var body: some View {
         ZStack {
@@ -60,7 +61,7 @@ struct ContentView: View {
                     // OK button in the center
                     Button(action: {
                         kodiClient.sendRequest(method: "Input.Select") { result in
-                            printResult(result, action: "OK")
+                            self.printResult(result, action: "OK")
                         }
                     }) {
                         Image(systemName: "circle")
@@ -128,8 +129,20 @@ struct ContentView: View {
             }
             .padding(.horizontal, 120)
         }
-        .alert(item: $errorMessage) { message in
-            Alert(title: Text("Error"), message: Text(message.message), dismissButton: .default(Text("OK")))
+        .onAppear {
+            NotificationCenter.default.addObserver(forName: .sendRequestFailed, object: nil, queue: .main) { notification in
+                self.showHelpAlert = true
+            }
+        }
+        .alert("Error", isPresented: $showHelpAlert) {
+            Button("Visit Help Page") {
+                if let url = URL(string: "https://kodi.com/how-to") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("An error occurred while connecting to Kodi. Check your network settings or visit the help page.")
         }
     }
     
