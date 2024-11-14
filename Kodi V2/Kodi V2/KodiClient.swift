@@ -127,7 +127,7 @@ class KodiClient: ObservableObject {
         ]
         
         makeKodiRequest(with: body) { data in
-            print("Playback position updated:", data)
+            // print("Playback position updated:", data)
         }
     }
 

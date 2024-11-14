@@ -3,13 +3,10 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
-    @State private var playbackPosition: Double = 0.0
-    @State private var totalDuration: Double = 100.0
     @State private var isDraggingSlider = false
     
     var body: some View {
         VStack(spacing: 40) {
-                        
             Text("Kodi Remote")
                 .font(.largeTitle)
                 .fontWeight(.bold)
@@ -47,27 +44,16 @@ struct ContentView: View {
             
             VStack(spacing: 10) {
                 Slider(
-                    value: $playbackPosition,
-                    in: 0...totalDuration,
-                    step: 1.0,
-                    onEditingChanged: { editing in
-                        isDraggingSlider = editing
-                        if !editing {
-                            // Only update the playback position when user stops dragging
-                            kodiClient.setKodiPlaybackPosition(playbackPosition)
-                        }
-                    },
-                    minimumValueLabel: Text(formatTime(playbackPosition)),
-                    maximumValueLabel: Text(formatTime(totalDuration))
+                    value: $kodiClient.playbackPosition,
+                    in: 0...kodiClient.totalDuration,
+                    step: 1.0
                 ) {
                     Text("Position")
                 }
                 .tint(.blue)
                 .padding(.horizontal, 20)
-                .onChange(of: kodiClient.playbackPosition) { newPosition in
-                    if !isDraggingSlider {
-                        playbackPosition = newPosition
-                    }
+                .onChange(of: kodiClient.playbackPosition) { newValue in
+                    kodiClient.setKodiPlaybackPosition(newValue)
                 }
             }
             
@@ -83,13 +69,6 @@ struct ContentView: View {
         .background(Color(.systemGray6).ignoresSafeArea())
         .onAppear {
             kodiClient.fetchPlaybackInfo()
-        }
-        .onReceive(Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()) { _ in
-            if !isDraggingSlider {
-                kodiClient.fetchPlaybackInfo()
-                playbackPosition = kodiClient.playbackPosition
-                totalDuration = kodiClient.totalDuration
-            }
         }
         .alert(isPresented: $kodiClient.showErrorAlert) {
             Alert(
