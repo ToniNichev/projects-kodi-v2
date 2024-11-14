@@ -31,6 +31,9 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                             .padding()
                     }
+                    Button("Settings") {
+                        // Placeholder for settings UI
+                    }
                 }
 
                 Spacer()

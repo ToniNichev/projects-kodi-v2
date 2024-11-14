@@ -1,9 +1,11 @@
 import Foundation
 import SwiftUI
 
+
 class KodiClient: ObservableObject {
-    @Published var kodiIP: String = "192.168.1.207" // replace with your Kodi IP
-    private let port = 8080
+    @Published var kodiIP: String = "192.168.1.207" // Default Kodi IP
+    @Published var port: Int = 8080                 // Default port
+    private let playerID = 1
 
     enum Direction: String {
         case up = "Up"
@@ -17,6 +19,7 @@ class KodiClient: ObservableObject {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.timeoutInterval = 10 // 10 seconds timeout
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let json: [String: Any] = [
@@ -32,20 +35,27 @@ class KodiClient: ObservableObject {
             if let error = error {
                 DispatchQueue.main.async {
                     completion(.failure(error))
+                    NotificationCenter.default.post(name: .sendRequestFailed, object: nil, userInfo: ["error": error.localizedDescription])
                 }
                 return
             }
             guard let data = data else { return }
             DispatchQueue.main.async {
                 completion(.success(data))
+                NotificationCenter.default.post(name: .sendRequestCompleted, object: nil)
             }
         }
         task.resume()
     }
 
     func playPause() {
-        sendRequest(method: "Player.PlayPause", params: ["playerid": 1]) { result in
-            self.printResult(result, action: "Play/Pause")
+        sendRequest(method: "Player.PlayPause", params: ["playerid": playerID]) { result in
+            switch result {
+            case .success:
+                print("Play/Pause success")
+            case .failure(let error):
+                print("Play/Pause failed: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -97,9 +107,4 @@ class KodiClient: ObservableObject {
             NotificationCenter.default.post(name: .sendRequestFailed, object: nil, userInfo: ["error": error.localizedDescription])
         }
     }
-}
-
-// Notification for sendRequest failure
-extension Notification.Name {
-    static let sendRequestFailed = Notification.Name("sendRequestFailed")
 }
