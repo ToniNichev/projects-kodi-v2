@@ -43,6 +43,17 @@ struct ContentView: View {
             Spacer()
             
             VStack(spacing: 10) {
+                HStack {
+                    Text(formatTime(kodiClient.playbackPosition))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text(formatTime(kodiClient.totalDuration))
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .padding(.horizontal, 20)
+                
                 Slider(
                     value: $kodiClient.playbackPosition,
                     in: 0...kodiClient.totalDuration,
@@ -86,6 +97,7 @@ struct ContentView: View {
         return String(format: "%02d:%02d:%02d", hours, minutes, secs)
     }
 }
+
 
 struct ControlButton: View {
     let imageName: String
