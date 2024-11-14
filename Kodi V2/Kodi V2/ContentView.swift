@@ -13,6 +13,35 @@ struct ContentView: View {
                 .foregroundColor(.primary)
                 .padding(.top, 40)
             
+            Spacer()
+            
+            // Directional Controls
+            VStack(spacing: 20) {
+                ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
+                
+                HStack(spacing: 40) {
+                    ControlButton(imageName: "chevron.left", action: { kodiClient.sendDirection(.left) })
+                    
+                    Button(action: { kodiClient.sendSelectAction() }) {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .frame(width: 60, height: 60)
+                            .overlay(
+                                Text("OK")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                            )
+                            .shadow(radius: 5)
+                    }
+                    
+                    ControlButton(imageName: "chevron.right", action: { kodiClient.sendDirection(.right) })
+                }
+                
+                ControlButton(imageName: "chevron.down", action: { kodiClient.sendDirection(.down) })
+            }
+            
+            Spacer()
+            
             // Playback Position Slider and Label
             VStack(spacing: 10) {
                 Slider(value: $kodiClient.playbackPosition, in: 0...kodiClient.totalDuration, step: 1.0) {
@@ -40,33 +69,6 @@ struct ContentView: View {
                 ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
                 ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
             }
-            
-            // Directional Controls
-            VStack(spacing: 20) {
-                ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
-                
-                HStack(spacing: 40) {
-                    ControlButton(imageName: "chevron.left", action: { kodiClient.sendDirection(.left) })
-                    
-                    Button(action: { /* OK Button Action */ }) {
-                        Circle()
-                            .fill(Color.blue.opacity(0.2))
-                            .frame(width: 60, height: 60)
-                            .overlay(
-                                Text("OK")
-                                    .font(.headline)
-                                    .foregroundColor(.blue)
-                            )
-                            .shadow(radius: 5)
-                    }
-                    
-                    ControlButton(imageName: "chevron.right", action: { kodiClient.sendDirection(.right) })
-                }
-                
-                ControlButton(imageName: "chevron.down", action: { kodiClient.sendDirection(.down) })
-            }
-            
-            Spacer()
         }
         .padding()
         .background(Color(.systemGray6).ignoresSafeArea())

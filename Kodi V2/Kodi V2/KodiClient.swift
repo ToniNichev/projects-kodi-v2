@@ -76,6 +76,18 @@ class KodiClient: ObservableObject {
     }
 
     // MARK: - Public API Methods
+    
+    func sendSelectAction() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Input.Select",
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("Select action sent:", data)
+        }
+    }
 
     func fetchPlaybackInfo() {
         let body: [String: Any] = [
