@@ -1,26 +1,18 @@
 import SwiftUI
-import Foundation
-
-// Wrapper struct for error message, conforming to Identifiable
-struct ErrorMessage: Identifiable {
-    let id = UUID()
-    let message: String
-}
-
-// MARK: - Kodi Remote Control SwiftUI App
 
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
-    @State private var isPlaying = false // State variable to track play/pause
-    @State private var errorMessage: ErrorMessage? // State for error message
-    @State private var showHelpAlert = false // State for showing help alert
-
+    @State private var isPlaying = false
+    @State private var totalDuration: Double = 100.0 // 100 %
+    @State private var playbackPosition: Double = 0.0
+    @State private var errorMessage: ErrorMessage?
+    @State private var showHelpAlert = false
+    
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea() // Plain white background for a minimal look
-
+            Color.white.ignoresSafeArea()
+            
             VStack {
-                // Top Info Button
                 HStack {
                     Spacer()
                     Button(action: {
@@ -35,24 +27,10 @@ struct ContentView: View {
                         // Placeholder for settings UI
                     }
                 }
-
+                
                 Spacer()
-                
-                // Playback Slider
-                Slider(value: Binding(
-                    get: { Double(kodiClient.currentPosition) },
-                    set: { newValue in
-                        let newPosition = Int(newValue)
-                        kodiClient.seek(to: newPosition)
-                    }
-                ), in: 0...Double(kodiClient.totalDuration))
-                .padding()
-                .onAppear {
-                    kodiClient.fetchMediaInfo()
-                }
-                
 
-                // Up Button
+                // Navigation Controls
                 Button(action: {
                     kodiClient.navigate(direction: .up)
                 }) {
@@ -62,9 +40,7 @@ struct ContentView: View {
                 }
                 .padding(.bottom, 20)
 
-                // Center Row - Left, OK, Right
                 HStack {
-                    // Left button
                     Button(action: {
                         kodiClient.navigate(direction: .left)
                     }) {
@@ -75,7 +51,6 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // OK button in the center
                     Button(action: {
                         kodiClient.sendRequest(method: "Input.Select") { result in
                             self.printResult(result, action: "OK")
@@ -88,7 +63,6 @@ struct ContentView: View {
 
                     Spacer()
 
-                    // Right button
                     Button(action: {
                         kodiClient.navigate(direction: .right)
                     }) {
@@ -100,7 +74,6 @@ struct ContentView: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 20)
 
-                // Down Button
                 Button(action: {
                     kodiClient.navigate(direction: .down)
                 }) {
@@ -111,10 +84,9 @@ struct ContentView: View {
                 .padding(.top, 20)
 
                 Spacer()
-
-                // Bottom - Media Controls (Back, Play, Pause, Stop, Fast Forward, Rewind)
+                
+                // Playback Control Buttons
                 HStack(spacing: 30) {
-                    // Back button
                     Button(action: {
                         kodiClient.back()
                     }) {
@@ -123,7 +95,6 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Rewind button
                     Button(action: {
                         kodiClient.rewind()
                     }) {
@@ -132,7 +103,6 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Play/Pause button that toggles icon based on play state
                     Button(action: {
                         kodiClient.playPause()
                         isPlaying.toggle()
@@ -142,7 +112,6 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Fast Forward button
                     Button(action: {
                         kodiClient.fastForward()
                     }) {
@@ -151,7 +120,6 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
 
-                    // Stop button
                     Button(action: {
                         kodiClient.stop()
                     }) {
@@ -160,14 +128,31 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
                 }
+                .padding(.bottom, 20)
+                
+                // Slider for Seeking
+                VStack {
+                    Slider(value: $playbackPosition, in: 0...totalDuration, step: 1.0) {
+                        Text("Position")
+                    } minimumValueLabel: {
+                        Text("0:00")
+                    } maximumValueLabel: {
+                        Text(formatTime(totalDuration))
+                    }
+                    .onChange(of: playbackPosition) { newValue in
+                        kodiClient.setKodiPlaybackPosition(newValue)
+                    }
+                    
+                    Text("Playback Position: \(formatTime(playbackPosition))")
+                        .padding()
+                }
                 .padding(.bottom, 40)
+                .onAppear()
+                {
+                    kodiClient.fetchPlaybackInfo()
+                }
             }
             .padding(.horizontal, 120)
-        }
-        .onAppear {
-            NotificationCenter.default.addObserver(forName: .sendRequestFailed, object: nil, queue: .main) { notification in
-                self.showHelpAlert = true
-            }
         }
         .alert("Error", isPresented: $showHelpAlert) {
             Button("Visit Help Page") {
@@ -180,7 +165,7 @@ struct ContentView: View {
             Text("An error occurred while connecting to Kodi. Check your network settings or visit the help page.")
         }
     }
-    
+
     private func printResult(_ result: Result<Data, Error>, action: String) {
         switch result {
         case .success:
@@ -189,7 +174,19 @@ struct ContentView: View {
             errorMessage = ErrorMessage(message: "\(action) Error: \(error.localizedDescription)")
         }
     }
+    
+    func formatTime(_ seconds: Double) -> String {
+        let hours = Int(seconds) / 3600
+        let minutes = (Int(seconds) % 3600) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+    }
 }
+
+#Preview {
+    ContentView()
+}
+
 
 #Preview {
     ContentView()
