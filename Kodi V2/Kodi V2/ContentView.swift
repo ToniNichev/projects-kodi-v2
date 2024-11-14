@@ -3,6 +3,9 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
+    @State private var playbackPosition: Double = 0.0
+    @State private var totalDuration: Double = 100.0
+    @State private var isDraggingSlider = false
     
     var body: some View {
         VStack(spacing: 40) {
@@ -42,24 +45,30 @@ struct ContentView: View {
             
             Spacer()
             
-            // Playback Position Slider and Label
             VStack(spacing: 10) {
-                Slider(value: $kodiClient.playbackPosition, in: 0...kodiClient.totalDuration, step: 1.0) {
+                Slider(
+                    value: $playbackPosition,
+                    in: 0...totalDuration,
+                    step: 1.0,
+                    onEditingChanged: { editing in
+                        isDraggingSlider = editing
+                        if !editing {
+                            // Only update the playback position when user stops dragging
+                            kodiClient.setKodiPlaybackPosition(playbackPosition)
+                        }
+                    },
+                    minimumValueLabel: Text(formatTime(playbackPosition)),
+                    maximumValueLabel: Text(formatTime(totalDuration))
+                ) {
                     Text("Position")
-                } minimumValueLabel: {
-                    Text("0:00")
-                } maximumValueLabel: {
-                    Text(formatTime(kodiClient.totalDuration))
-                }
-                .onChange(of: kodiClient.playbackPosition) { newValue in
-                    kodiClient.setKodiPlaybackPosition(newValue)
                 }
                 .tint(.blue)
                 .padding(.horizontal, 20)
-                
-                Text("Playback Position: \(formatTime(kodiClient.playbackPosition))")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                .onChange(of: kodiClient.playbackPosition) { newPosition in
+                    if !isDraggingSlider {
+                        playbackPosition = newPosition
+                    }
+                }
             }
             
             // Playback Controls with Stop Button
@@ -74,6 +83,13 @@ struct ContentView: View {
         .background(Color(.systemGray6).ignoresSafeArea())
         .onAppear {
             kodiClient.fetchPlaybackInfo()
+        }
+        .onReceive(Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()) { _ in
+            if !isDraggingSlider {
+                kodiClient.fetchPlaybackInfo()
+                playbackPosition = kodiClient.playbackPosition
+                totalDuration = kodiClient.totalDuration
+            }
         }
         .alert(isPresented: $kodiClient.showErrorAlert) {
             Alert(
