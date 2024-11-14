@@ -6,6 +6,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 40) {
+                        
             Text("Kodi Remote")
                 .font(.largeTitle)
                 .fontWeight(.bold)
@@ -20,6 +21,9 @@ struct ContentView: View {
                     Text("0:00")
                 } maximumValueLabel: {
                     Text(formatTime(kodiClient.totalDuration))
+                }
+                .onChange(of: kodiClient.playbackPosition) { newValue in
+                    kodiClient.setKodiPlaybackPosition(newValue)
                 }
                 .tint(.blue)
                 .padding(.horizontal, 20)
