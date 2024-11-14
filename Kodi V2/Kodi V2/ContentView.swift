@@ -1,177 +1,80 @@
 import SwiftUI
 
+
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
-    @State private var isPlaying = false
-    @State private var totalDuration: Double = 100.0 // 100 %
-    @State private var playbackPosition: Double = 0.0
-    @State private var errorMessage: ErrorMessage?
-    @State private var showHelpAlert = false
     
     var body: some View {
-        ZStack {
-            Color.white.ignoresSafeArea()
+        VStack(spacing: 40) {
+            Text("Kodi Remote")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .padding(.top, 40)
             
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        kodiClient.showInfo()
-                    }) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 24))
-                            .foregroundColor(.gray)
-                            .padding()
-                    }
-                    Button("Settings") {
-                        // Placeholder for settings UI
-                    }
+            // Playback Position Slider and Label
+            VStack(spacing: 10) {
+                Slider(value: $kodiClient.playbackPosition, in: 0...kodiClient.totalDuration, step: 1.0) {
+                    Text("Position")
+                } minimumValueLabel: {
+                    Text("0:00")
+                } maximumValueLabel: {
+                    Text(formatTime(kodiClient.totalDuration))
                 }
+                .tint(.blue)
+                .padding(.horizontal, 20)
                 
-                Spacer()
-
-                // Navigation Controls
-                Button(action: {
-                    kodiClient.navigate(direction: .up)
-                }) {
-                    Image(systemName: "chevron.up")
-                        .font(.system(size: 36))
-                        .foregroundColor(.gray)
-                }
-                .padding(.bottom, 20)
-
-                HStack {
-                    Button(action: {
-                        kodiClient.navigate(direction: .left)
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 36))
-                            .foregroundColor(.gray)
-                    }
-
-                    Spacer()
-
-                    Button(action: {
-                        kodiClient.sendRequest(method: "Input.Select") { result in
-                            self.printResult(result, action: "OK")
-                        }
-                    }) {
-                        Image(systemName: "circle")
-                            .font(.system(size: 36))
-                            .foregroundColor(.gray)
-                    }
-
-                    Spacer()
-
-                    Button(action: {
-                        kodiClient.navigate(direction: .right)
-                    }) {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 36))
-                            .foregroundColor(.gray)
-                    }
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 20)
-
-                Button(action: {
-                    kodiClient.navigate(direction: .down)
-                }) {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 36))
-                        .foregroundColor(.gray)
-                }
-                .padding(.top, 20)
-
-                Spacer()
+                Text("Playback Position: \(formatTime(kodiClient.playbackPosition))")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            // Playback Controls with Stop Button
+            HStack(spacing: 20) {
+                ControlButton(imageName: "backward.fill", action: { kodiClient.rewind() })
+                ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
+                ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
+                ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
+            }
+            
+            // Directional Controls
+            VStack(spacing: 20) {
+                ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
                 
-                // Playback Control Buttons
-                HStack(spacing: 30) {
-                    Button(action: {
-                        kodiClient.back()
-                    }) {
-                        Image(systemName: "arrow.uturn.backward")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-
-                    Button(action: {
-                        kodiClient.rewind()
-                    }) {
-                        Image(systemName: "gobackward")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-
-                    Button(action: {
-                        kodiClient.playPause()
-                        isPlaying.toggle()
-                    }) {
-                        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-
-                    Button(action: {
-                        kodiClient.fastForward()
-                    }) {
-                        Image(systemName: "goforward")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-
-                    Button(action: {
-                        kodiClient.stop()
-                    }) {
-                        Image(systemName: "stop.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.gray)
-                    }
-                }
-                .padding(.bottom, 20)
-                
-                // Slider for Seeking
-                VStack {
-                    Slider(value: $playbackPosition, in: 0...totalDuration, step: 1.0) {
-                        Text("Position")
-                    } minimumValueLabel: {
-                        Text("0:00")
-                    } maximumValueLabel: {
-                        Text(formatTime(totalDuration))
-                    }
-                    .onChange(of: playbackPosition) { newValue in
-                        kodiClient.setKodiPlaybackPosition(newValue)
+                HStack(spacing: 40) {
+                    ControlButton(imageName: "chevron.left", action: { kodiClient.sendDirection(.left) })
+                    
+                    Button(action: { /* OK Button Action */ }) {
+                        Circle()
+                            .fill(Color.blue.opacity(0.2))
+                            .frame(width: 60, height: 60)
+                            .overlay(
+                                Text("OK")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                            )
+                            .shadow(radius: 5)
                     }
                     
-                    Text("Playback Position: \(formatTime(playbackPosition))")
-                        .padding()
+                    ControlButton(imageName: "chevron.right", action: { kodiClient.sendDirection(.right) })
                 }
-                .padding(.bottom, 40)
-                .onAppear()
-                {
-                    kodiClient.fetchPlaybackInfo()
-                }
+                
+                ControlButton(imageName: "chevron.down", action: { kodiClient.sendDirection(.down) })
             }
-            .padding(.horizontal, 120)
+            
+            Spacer()
         }
-        .alert("Error", isPresented: $showHelpAlert) {
-            Button("Visit Help Page") {
-                if let url = URL(string: "https://kodi.com/how-to") {
-                    UIApplication.shared.open(url)
-                }
-            }
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("An error occurred while connecting to Kodi. Check your network settings or visit the help page.")
+        .padding()
+        .background(Color(.systemGray6).ignoresSafeArea())
+        .onAppear {
+            kodiClient.fetchPlaybackInfo()
         }
-    }
-
-    private func printResult(_ result: Result<Data, Error>, action: String) {
-        switch result {
-        case .success:
-            print("\(action) Success")
-        case .failure(let error):
-            errorMessage = ErrorMessage(message: "\(action) Error: \(error.localizedDescription)")
+        .alert(isPresented: $kodiClient.showErrorAlert) {
+            Alert(
+                title: Text("Error"),
+                message: Text(kodiClient.errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
     
@@ -183,10 +86,22 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
+struct ControlButton: View {
+    let imageName: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: imageName)
+                .font(.title)
+                .foregroundColor(.white)
+                .frame(width: 50, height: 50)
+                .background(Color.blue)
+                .clipShape(Circle())
+                .shadow(radius: 5)
+        }
+    }
 }
-
 
 #Preview {
     ContentView()
