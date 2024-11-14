@@ -6,6 +6,8 @@ class KodiClient: ObservableObject {
     @Published var kodiIP: String = "192.168.1.207" // Default Kodi IP
     @Published var port: Int = 8080                 // Default port
     private let playerID = 1
+    @Published var totalDuration: Int = 0 // Media duration in seconds
+    @Published var currentPosition: Int = 0 // Current position in seconds
 
     enum Direction: String {
         case up = "Up"
@@ -46,6 +48,36 @@ class KodiClient: ObservableObject {
             }
         }
         task.resume()
+    }
+    
+    func fetchMediaInfo() {
+        sendRequest(method: "Player.GetProperties", params: ["playerid": playerID, "properties": ["time", "totaltime"]]) { result in
+            switch result {
+            case .success(let data):
+                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let result = json["result"] as? [String: Any],
+                   let time = result["time"] as? [String: Int],
+                   let totaltime = result["totaltime"] as? [String: Int] {
+                    let currentSeconds = (time["hours"] ?? 0) * 3600 + (time["minutes"] ?? 0) * 60 + (time["seconds"] ?? 0)
+                    let totalSeconds = (totaltime["hours"] ?? 0) * 3600 + (totaltime["minutes"] ?? 0) * 60 + (totaltime["seconds"] ?? 0)
+                    self.currentPosition = currentSeconds
+                    self.totalDuration = totalSeconds
+                }
+            case .failure(let error):
+                print("Failed to fetch media info: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func seek(to position: Int) {
+        sendRequest(method: "Player.Seek", params: ["playerid": playerID, "value": position]) { result in
+            switch result {
+            case .success:
+                print("Seeked to \(position) seconds")
+            case .failure(let error):
+                print("Failed to seek: \(error.localizedDescription)")
+            }
+        }
     }
 
     func playPause() {

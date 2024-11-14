@@ -37,6 +37,20 @@ struct ContentView: View {
                 }
 
                 Spacer()
+                
+                // Playback Slider
+                Slider(value: Binding(
+                    get: { Double(kodiClient.currentPosition) },
+                    set: { newValue in
+                        let newPosition = Int(newValue)
+                        kodiClient.seek(to: newPosition)
+                    }
+                ), in: 0...Double(kodiClient.totalDuration))
+                .padding()
+                .onAppear {
+                    kodiClient.fetchMediaInfo()
+                }
+                
 
                 // Up Button
                 Button(action: {
