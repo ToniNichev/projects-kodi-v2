@@ -44,31 +44,37 @@ struct ContentView: View {
             Spacer()
             
             VStack(spacing: 10) {
-                HStack {
-                    Text(formatTime(kodiClient.playbackPosition))
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Spacer()
-                    Text(formatTime(kodiClient.totalDuration))
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                .padding(.horizontal, 20)
-                
-                Slider(
-                    value: $kodiClient.playbackPosition,
-                    in: 0...kodiClient.totalDuration,
-                    step: 1.0,
-                    onEditingChanged: { editing in
-                        kodiClient.isSeeking = editing
-                        if !editing {
-                            // User finished seeking, update Kodi playback position
-                            kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
-                        }
+                if kodiClient.totalDuration > 0 {
+                    HStack {
+                        Text(formatTime(kodiClient.playbackPosition))
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        Text(formatTime(kodiClient.totalDuration))
+                            .font(.caption)
+                            .foregroundColor(.gray)
                     }
-                )
-                .tint(.blue)
-                .padding(.horizontal, 20)
+                    .padding(.horizontal, 20)
+                    Slider(
+                        value: $kodiClient.playbackPosition,
+                        in: 0...kodiClient.totalDuration,
+                        step: 1.0,
+                        onEditingChanged: { editing in
+                            kodiClient.isSeeking = editing
+                            if !editing {
+                                // User finished seeking, update Kodi playback position
+                                kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
+                            }
+                        }
+                    )
+                    .tint(.blue)
+                    .padding(.horizontal, 20)
+                } else {
+                    Text("No playback information available")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 20)
+                }
             }
             .onAppear {
                 startTimer()
