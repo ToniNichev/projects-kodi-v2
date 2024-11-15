@@ -71,8 +71,8 @@ struct ContentView: View {
             // Playback Controls with Stop Button
             HStack(spacing: 20) {
                 ControlButton(imageName: "backward.fill", action: { kodiClient.rewind() })
-                ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
                 ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
+                ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
                 ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
             }
         }
@@ -108,7 +108,7 @@ struct ControlButton: View {
             Image(systemName: imageName)
                 .font(.title)
                 .foregroundColor(.white)
-                .frame(width: 50, height: 50)
+                .frame(width: 70, height: 70)
                 .background(Color.blue)
                 .clipShape(Circle())
                 .shadow(radius: 5)
