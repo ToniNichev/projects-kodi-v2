@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
     @State private var isDraggingSlider = false
+    @State private var timer: Timer? = nil
     
     var body: some View {
         VStack(spacing: 40) {
@@ -57,15 +58,23 @@ struct ContentView: View {
                 Slider(
                     value: $kodiClient.playbackPosition,
                     in: 0...kodiClient.totalDuration,
-                    step: 1.0
-                ) {
-                    Text("Position")
-                }
+                    step: 1.0,
+                    onEditingChanged: { editing in
+                        kodiClient.isSeeking = editing
+                        if !editing {
+                            // User finished seeking, update Kodi playback position
+                            kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
+                        }
+                    }
+                )
                 .tint(.blue)
                 .padding(.horizontal, 20)
-                .onChange(of: kodiClient.playbackPosition) { newValue in
-                    kodiClient.setKodiPlaybackPosition(newValue)
-                }
+            }
+            .onAppear {
+                startTimer()
+            }
+            .onDisappear {
+                stopTimer()
             }
             
             // Playback Controls with Stop Button
@@ -95,6 +104,17 @@ struct ContentView: View {
         let minutes = (Int(seconds) % 3600) / 60
         let secs = Int(seconds) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            kodiClient.fetchPlaybackInfo()
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }
 

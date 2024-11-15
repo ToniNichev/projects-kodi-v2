@@ -8,9 +8,10 @@ class KodiClient: ObservableObject {
     @Published var playbackPosition: Double = 0.0
     @Published var showErrorAlert = false
     @Published var errorMessage: String = ""
+    @State  var isSeeking: Bool = false
 
     // let kodiAddress = "http://10.0.1.119:8080/jsonrpc"
-    let kodiAddress = "http://192.168.1.200:8080/jsonrpc"
+    let kodiAddress = "http://10.0.1.134:8080/jsonrpc"
     private var timer: Timer?
 
     enum Direction: String {
