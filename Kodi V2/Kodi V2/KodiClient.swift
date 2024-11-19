@@ -9,9 +9,14 @@ class KodiClient: ObservableObject {
     @Published var showErrorAlert = false
     @Published var errorMessage: String = ""
     @State  var isSeeking: Bool = false
+    
+    @Published var currentYear: Int? = nil
+    @Published var currentGenre: String = ""
+    @Published var currentThumbnail: String? = nil
+    @Published var currentMovieTitle: String = "Kodi Remote"
 
     // let kodiAddress = "http://10.0.1.119:8080/jsonrpc"
-    let kodiAddress = "http://10.0.1.134:8080/jsonrpc"
+    let kodiAddress = "http://10.0.1.119:8080/jsonrpc"
     private var timer: Timer?
 
     enum Direction: String {
@@ -110,6 +115,11 @@ class KodiClient: ObservableObject {
                 DispatchQueue.main.async {
                     self.playbackPosition = currentSeconds
                     self.totalDuration = totalSeconds
+                    
+                    // Fetch the current item's details if playback is active
+                    if totalSeconds > 0 {
+                        self.fetchCurrentItemDetails()
+                    }
                 }
             }
         }
@@ -194,6 +204,38 @@ class KodiClient: ObservableObject {
         
         makeKodiRequest(with: body) { data in
             print("Direction \(direction.rawValue) sent:", data)
+        }
+    }
+    
+    func fetchCurrentItemDetails() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Player.GetItem",
+            "params": [
+                "playerid": playerID,
+                "properties": ["title", "artist", "album", "genre", "thumbnail", "fanart", "year", "rating"]
+            ],
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            if let result = data["result"] as? [String: Any],
+               let item = result["item"] as? [String: Any] {
+                
+                // Parse metadata
+                let title = item["title"] as? String ?? item["label"] as? String ?? "Unknown Title"
+                let thumbnail = item["thumbnail"] as? String
+                let year = item["year"] as? Int
+                let genre = item["genre"] as? [String]
+                
+                DispatchQueue.main.async {
+                    // Update published properties for UI binding
+                    self.currentMovieTitle = title
+                    self.currentYear = year
+                    self.currentGenre = genre?.joined(separator: ", ") ?? "Unknown Genre"
+                    self.currentThumbnail = thumbnail
+                }
+            }
         }
     }
 }
