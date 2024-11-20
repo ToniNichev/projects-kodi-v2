@@ -3,20 +3,19 @@ import SwiftUI
 
 class KodiClient: ObservableObject {
     @Published var port: Int = 8080
+    @Published var kodiAddress: String = "http://10.0.1.119:8080/jsonrpc" // Changed to @Published
     private let playerID = 1
     @Published var totalDuration: Double = 100.0
     @Published var playbackPosition: Double = 0.0
     @Published var showErrorAlert = false
     @Published var errorMessage: String = ""
-    @State  var isSeeking: Bool = false
-    
+    @State var isSeeking: Bool = false
+
     @Published var currentYear: Int? = nil
     @Published var currentGenre: String = ""
     @Published var currentThumbnail: String? = nil
     @Published var currentMovieTitle: String = "Kodi Remote"
 
-    // let kodiAddress = "http://10.0.1.119:8080/jsonrpc"
-    let kodiAddress = "http://10.0.1.119:8080/jsonrpc"
     private var timer: Timer?
 
     enum Direction: String {

@@ -4,6 +4,7 @@ struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
     @State private var isDraggingSlider = false
     @State private var timer: Timer? = nil
+    @State private var isShowingSettings = false // State for showing the settings view
 
     var body: some View {
         ZStack {
@@ -13,31 +14,46 @@ struct ContentView: View {
                 AsyncImage(url: thumbnailURL) { image in
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fill) // Fill the view
-                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height) // Fill the screen
-                        .clipped() // Ensure it doesn't overflow
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                        .clipped()
                         .ignoresSafeArea()
                         .overlay(
-                            Color.black.opacity(0.5) // Darker overlay for better readability
+                            Color.black.opacity(0.5)
                         )
                 } placeholder: {
-                    Color(.systemGray6).ignoresSafeArea() // Placeholder color
+                    Color(.systemGray6).ignoresSafeArea()
                 }
             } else {
-                Color(.systemGray6).ignoresSafeArea() // Default background
+                Color(.systemGray6).ignoresSafeArea()
             }
 
             // Foreground content
             VStack(spacing: 40) {
-                Text(kodiClient.currentMovieTitle)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.top, 40)
-                
+                Spacer()
+                    .frame(height: 10)
+                HStack {
+                    Text(kodiClient.currentMovieTitle)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.top, 40)
+                    Spacer()
+                    Button(action: {
+                        isShowingSettings.toggle() // Toggle settings view
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.gray.opacity(0.7))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal)
+
                 Spacer()
 
-                // Directional Controls
                 VStack(spacing: 20) {
                     ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
 
@@ -83,7 +99,6 @@ struct ContentView: View {
                             onEditingChanged: { editing in
                                 isDraggingSlider = editing
                                 if !editing {
-                                    // Seek when the user stops dragging
                                     kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
                                 }
                             }
@@ -104,18 +119,17 @@ struct ContentView: View {
                     stopTimer()
                 }
 
-                // Playback Controls with Stop Button
                 HStack(spacing: 20) {
                     ControlButton(imageName: "backward.fill", action: { kodiClient.rewind() })
                     ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
                     ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
                     ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
                 }
-                .padding(.bottom, 20) // Add padding to keep buttons above the screen edge
+                .padding(.bottom, 20)
             }
             .padding(.horizontal)
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 20) // Ensures safe area for devices with a home indicator
+            .sheet(isPresented: $isShowingSettings) {
+                SettingsView(kodiClient: kodiClient) // Present SettingsView
             }
         }
         .onAppear {
@@ -149,8 +163,6 @@ struct ContentView: View {
         timer = nil
     }
 }
-
-
 
 
 struct ControlButton: View {
