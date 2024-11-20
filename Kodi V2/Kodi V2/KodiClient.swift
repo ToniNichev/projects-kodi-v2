@@ -3,7 +3,7 @@ import SwiftUI
 
 class KodiClient: ObservableObject {
     @Published var port: Int = 8080
-    @Published var kodiAddress: String = "http://10.0.1.119:8080/jsonrpc" // Changed to @Published
+    @Published var kodiAddress: String = "10.0.1.1" // IP only
     private let playerID = 1
     @Published var totalDuration: Double = 100.0
     @Published var playbackPosition: Double = 0.0
@@ -15,6 +15,9 @@ class KodiClient: ObservableObject {
     @Published var currentGenre: String = ""
     @Published var currentThumbnail: String? = nil
     @Published var currentMovieTitle: String = "Kodi Remote"
+    
+    private let kodiAddressKey = "kodiAddressKey"
+    private let portKey = "portKey"
 
     private var timer: Timer?
 
@@ -24,11 +27,30 @@ class KodiClient: ObservableObject {
         case left = "Left"
         case right = "Right"
     }
+    
+    func saveSettings() {
+        UserDefaults.standard.set(kodiAddress, forKey: kodiAddressKey)
+        UserDefaults.standard.set(port, forKey: portKey)
+    }
+
+    func loadSettings() {
+        if let savedAddress = UserDefaults.standard.string(forKey: kodiAddressKey) {
+            kodiAddress = savedAddress
+        }
+        if let savedPort = UserDefaults.standard.value(forKey: portKey) as? Int {
+            port = savedPort
+        }
+    }
+    
 
     // MARK: - Common Request and Result Handling
 
     func makeKodiRequest(with body: [String: Any], completion: (([String: Any]) -> Void)? = nil) {
-        guard let url = URL(string: kodiAddress) else { return }
+        let urlString = "http://\(kodiAddress):\(port)/jsonrpc"
+        guard let url = URL(string: urlString) else {
+            handleRequestError(NSError(domain: "Invalid URL", code: -1), message: "Failed to create URL.")
+            return
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

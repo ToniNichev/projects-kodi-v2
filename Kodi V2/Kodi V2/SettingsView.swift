@@ -25,10 +25,10 @@ struct SettingsView: View {
                     TextField("Port", value: $tempPort, formatter: NumberFormatter())
                         .keyboardType(.numberPad)
                 }
-
                 Button("Save") {
                     kodiClient.kodiAddress = tempKodiAddress
                     kodiClient.port = tempPort
+                    kodiClient.saveSettings() // Save to UserDefaults
                     presentationMode.wrappedValue.dismiss()
                 }
                 .frame(maxWidth: .infinity)
