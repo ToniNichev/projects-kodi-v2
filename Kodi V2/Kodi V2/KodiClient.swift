@@ -3,7 +3,7 @@ import SwiftUI
 
 class KodiClient: ObservableObject {
     @Published var port: Int = 8080
-    @Published var kodiAddress: String = "10.0.1.1" // IP only
+    @Published var kodiAddress: String = "10.0.1.119" // IP only
     private let playerID = 1
     @Published var totalDuration: Double = 100.0
     @Published var playbackPosition: Double = 0.0

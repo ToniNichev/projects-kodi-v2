@@ -2,13 +2,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var kodiClient: KodiClient
+    @ObservedObject var colorSchemeSettings: ColorSchemeSettings // Passed from ContentView
     @Environment(\.presentationMode) var presentationMode
     @State private var tempKodiAddress: String
     @State private var tempPort: Int
 
-    // Initialize with current values
-    init(kodiClient: KodiClient) {
+    init(kodiClient: KodiClient, colorSchemeSettings: ColorSchemeSettings) {
         self.kodiClient = kodiClient
+        self.colorSchemeSettings = colorSchemeSettings
         _tempKodiAddress = State(initialValue: kodiClient.kodiAddress)
         _tempPort = State(initialValue: kodiClient.port)
     }
@@ -28,12 +29,17 @@ struct SettingsView: View {
                 Button("Save") {
                     kodiClient.kodiAddress = tempKodiAddress
                     kodiClient.port = tempPort
-                    kodiClient.saveSettings() // Save to UserDefaults
+                    kodiClient.saveSettings()
                     presentationMode.wrappedValue.dismiss()
                 }
                 .frame(maxWidth: .infinity)
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
+                
+                Section(header: Text("Button Color Settings")) {
+                    ColorPicker("Select Button Color", selection: $colorSchemeSettings.buttonColor)
+                        .padding()
+                }
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -48,11 +54,8 @@ struct SettingsView: View {
 }
 
 #Preview {
-    // Create a sample KodiClient for the preview
     let previewKodiClient = KodiClient()
-    previewKodiClient.kodiAddress = "http://192.168.1.100:8080/jsonrpc"
-    previewKodiClient.port = 9090
+    let previewColorSchemeSettings = ColorSchemeSettings()
 
-    return SettingsView(kodiClient: previewKodiClient)
+    return SettingsView(kodiClient: previewKodiClient, colorSchemeSettings: previewColorSchemeSettings)
 }
-

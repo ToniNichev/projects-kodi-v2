@@ -1,10 +1,13 @@
 import SwiftUI
 
+
 struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
+    @StateObject private var colorSchemeSettings = ColorSchemeSettings()
     @State private var isDraggingSlider = false
     @State private var timer: Timer? = nil
-    @State private var isShowingSettings = false // State for showing the settings view
+    @State private var isShowingSettings = false
+    @State private var isShowingColorPicker = false // State for showing color picker
 
     var body: some View {
         ZStack {
@@ -40,7 +43,7 @@ struct ContentView: View {
                         .padding(.top, 40)
                     Spacer()
                     Button(action: {
-                        isShowingSettings.toggle() // Toggle settings view
+                        isShowingSettings.toggle()
                     }) {
                         Image(systemName: "gearshape.fill")
                             .font(.title)
@@ -55,27 +58,43 @@ struct ContentView: View {
                 Spacer()
 
                 VStack(spacing: 20) {
-                    ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
+                    ControlButton(
+                        imageName: "chevron.up",
+                        action: { kodiClient.sendDirection(.up) },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
 
                     HStack(spacing: 40) {
-                        ControlButton(imageName: "chevron.left", action: { kodiClient.sendDirection(.left) })
+                        ControlButton(
+                            imageName: "chevron.left",
+                            action: { kodiClient.sendDirection(.left) },
+                            buttonColor: colorSchemeSettings.buttonColor
+                        )
 
                         Button(action: { kodiClient.sendSelectAction() }) {
                             Circle()
-                                .fill(Color.blue.opacity(0.2))
+                                .fill(colorSchemeSettings.buttonColor.opacity(0.2))
                                 .frame(width: 60, height: 60)
                                 .overlay(
                                     Text("OK")
                                         .font(.headline)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(colorSchemeSettings.buttonColor)
                                 )
                                 .shadow(radius: 5)
                         }
 
-                        ControlButton(imageName: "chevron.right", action: { kodiClient.sendDirection(.right) })
+                        ControlButton(
+                            imageName: "chevron.right",
+                            action: { kodiClient.sendDirection(.right) },
+                            buttonColor: colorSchemeSettings.buttonColor
+                        )
                     }
 
-                    ControlButton(imageName: "chevron.down", action: { kodiClient.sendDirection(.down) })
+                    ControlButton(
+                        imageName: "chevron.down",
+                        action: { kodiClient.sendDirection(.down) },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
                 }
 
                 Spacer()
@@ -103,7 +122,7 @@ struct ContentView: View {
                                 }
                             }
                         )
-                        .tint(.blue)
+                        .tint(colorSchemeSettings.buttonColor)
                         .padding(.horizontal, 20)
                     } else {
                         Text("No playback information available")
@@ -120,16 +139,49 @@ struct ContentView: View {
                 }
 
                 HStack(spacing: 20) {
-                    ControlButton(imageName: "backward.fill", action: { kodiClient.rewind() })
-                    ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
-                    ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
-                    ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
+                    ControlButton(
+                        imageName: "backward.fill",
+                        action: { kodiClient.rewind() },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
+                    ControlButton(
+                        imageName: "playpause.fill",
+                        action: { kodiClient.togglePlayPause() },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
+                    ControlButton(
+                        imageName: "stop.fill",
+                        action: { kodiClient.stopPlayback() },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
+                    ControlButton(
+                        imageName: "forward.fill",
+                        action: { kodiClient.fastForward() },
+                        buttonColor: colorSchemeSettings.buttonColor
+                    )
                 }
                 .padding(.bottom, 20)
             }
             .padding(.horizontal)
             .sheet(isPresented: $isShowingSettings) {
-                SettingsView(kodiClient: kodiClient) // Present SettingsView
+                SettingsView(kodiClient: kodiClient, colorSchemeSettings: colorSchemeSettings)
+            }
+            .sheet(isPresented: $isShowingColorPicker) {
+                VStack {
+                    Text("Select Button Color")
+                        .font(.headline)
+                        .padding()
+
+                    ColorPicker("Button Color", selection: $colorSchemeSettings.buttonColor)
+                        .padding()
+                        .frame(maxWidth: 300)
+
+                    Button("Close") {
+                        isShowingColorPicker = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding()
+                }
             }
         }
         .onAppear {
@@ -141,6 +193,14 @@ struct ContentView: View {
                 message: Text(kodiClient.errorMessage),
                 dismissButton: .default(Text("OK"))
             )
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { isShowingColorPicker.toggle() }) {
+                    Image(systemName: "paintpalette.fill")
+                        .foregroundColor(.white)
+                }
+            }
         }
     }
 
@@ -164,10 +224,10 @@ struct ContentView: View {
     }
 }
 
-
 struct ControlButton: View {
     let imageName: String
     let action: () -> Void
+    let buttonColor: Color
     
     var body: some View {
         Button(action: action) {
@@ -175,7 +235,7 @@ struct ControlButton: View {
                 .font(.title)
                 .foregroundColor(.white)
                 .frame(width: 70, height: 70)
-                .background(Color.blue)
+                .background(buttonColor)
                 .clipShape(Circle())
                 .shadow(radius: 5)
         }
