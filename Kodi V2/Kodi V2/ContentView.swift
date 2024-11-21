@@ -137,6 +137,29 @@ struct ContentView: View {
                 .onDisappear {
                     stopTimer()
                 }
+                
+                // Volume Control
+                VStack {
+                    HStack {
+                        Image(systemName: "speaker.fill")
+                            .foregroundColor(.gray)
+                        Slider(
+                            value: Binding(
+                                get: { Double(kodiClient.currentVolume) },
+                                set: { newValue in
+                                    kodiClient.currentVolume = Int(newValue)
+                                    kodiClient.setVolume(Int(newValue))
+                                }
+                            ),
+                            in: 0...100,
+                            step: 1.0
+                        )
+                        .tint(colorSchemeSettings.buttonColor)
+                        Image(systemName: "speaker.wave.3.fill")
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal, 20)
+                }
 
                 HStack(spacing: 20) {
                     ControlButton(
@@ -161,6 +184,7 @@ struct ContentView: View {
                     )
                 }
                 .padding(.bottom, 20)
+                
             }
             .padding(.horizontal)
             .sheet(isPresented: $isShowingSettings) {
@@ -186,6 +210,7 @@ struct ContentView: View {
         }
         .onAppear {
             kodiClient.fetchPlaybackInfo()
+            kodiClient.fetchVolume()
         }
         .alert(isPresented: $kodiClient.showErrorAlert) {
             Alert(
