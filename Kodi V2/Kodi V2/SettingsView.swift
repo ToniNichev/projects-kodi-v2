@@ -27,9 +27,15 @@ struct SettingsView: View {
                         .keyboardType(.numberPad)
                 }
                 Button("Save") {
+                    // Save the Kodi server settings
                     kodiClient.kodiAddress = tempKodiAddress
                     kodiClient.port = tempPort
                     kodiClient.saveSettings()
+
+                    // Save the color scheme settings
+                    colorSchemeSettings.color = colorSchemeSettings.buttonColor
+                    
+                    // Dismiss the view
                     presentationMode.wrappedValue.dismiss()
                 }
                 .frame(maxWidth: .infinity)

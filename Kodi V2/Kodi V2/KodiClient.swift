@@ -28,6 +28,10 @@ class KodiClient: ObservableObject {
         case right = "Right"
     }
     
+    init() {
+        loadSettings()
+    }
+    
     func saveSettings() {
         UserDefaults.standard.set(kodiAddress, forKey: kodiAddressKey)
         UserDefaults.standard.set(port, forKey: portKey)
