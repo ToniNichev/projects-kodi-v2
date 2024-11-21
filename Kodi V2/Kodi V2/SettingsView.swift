@@ -42,9 +42,17 @@ struct SettingsView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
                 
-                Section(header: Text("Button Color Settings")) {
+                Section(header: Text("Button Appearance")) {
                     ColorPicker("Select Button Color", selection: $colorSchemeSettings.buttonColor)
                         .padding()
+
+                    Picker("Button Shape", selection: $colorSchemeSettings.buttonShape) {
+                        Text("Circle").tag("Circle")
+                        Text("Rectangle").tag("Rectangle")
+                        Text("Capsule").tag("Capsule")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
                 }
             }
             .navigationTitle("Settings")

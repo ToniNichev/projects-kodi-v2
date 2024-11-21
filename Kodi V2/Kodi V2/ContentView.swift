@@ -61,14 +61,16 @@ struct ContentView: View {
                     ControlButton(
                         imageName: "chevron.up",
                         action: { kodiClient.sendDirection(.up) },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
 
                     HStack(spacing: 40) {
                         ControlButton(
                             imageName: "chevron.left",
                             action: { kodiClient.sendDirection(.left) },
-                            buttonColor: colorSchemeSettings.buttonColor
+                            buttonColor: colorSchemeSettings.buttonColor,
+                            buttonShape: colorSchemeSettings.buttonShape
                         )
 
                         Button(action: { kodiClient.sendSelectAction() }) {
@@ -86,14 +88,16 @@ struct ContentView: View {
                         ControlButton(
                             imageName: "chevron.right",
                             action: { kodiClient.sendDirection(.right) },
-                            buttonColor: colorSchemeSettings.buttonColor
+                            buttonColor: colorSchemeSettings.buttonColor,
+                            buttonShape: colorSchemeSettings.buttonShape
                         )
                     }
 
                     ControlButton(
                         imageName: "chevron.down",
                         action: { kodiClient.sendDirection(.down) },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
                 }
 
@@ -165,28 +169,33 @@ struct ContentView: View {
                     ControlButton(
                         imageName: "backward.fill",
                         action: { kodiClient.rewind() },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
                     ControlButton(
                         imageName: "playpause.fill",
                         action: { kodiClient.togglePlayPause() },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
                     ControlButton(
                         imageName: "stop.fill",
                         action: { kodiClient.stopPlayback() },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
                     ControlButton(
                         imageName: "forward.fill",
                         action: { kodiClient.fastForward() },
-                        buttonColor: colorSchemeSettings.buttonColor
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
                     )
                 }
                 .padding(.bottom, 20)
                 
             }
             .padding(.horizontal)
+            .padding(.bottom, 40) // Increased bottom padding
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView(kodiClient: kodiClient, colorSchemeSettings: colorSchemeSettings)
             }
@@ -253,6 +262,7 @@ struct ControlButton: View {
     let imageName: String
     let action: () -> Void
     let buttonColor: Color
+    let buttonShape: String
     
     var body: some View {
         Button(action: action) {
@@ -261,9 +271,34 @@ struct ControlButton: View {
                 .foregroundColor(.white)
                 .frame(width: 70, height: 70)
                 .background(buttonColor)
-                .clipShape(Circle())
+                .clipShape(getShape())
                 .shadow(radius: 5)
         }
+    }
+    
+    func getShape() -> AnyShape {
+        switch buttonShape {
+        case "Circle":
+            return AnyShape(Circle())
+        case "Rectangle":
+            return AnyShape(RoundedRectangle(cornerRadius: 10))
+        case "Capsule":
+            return AnyShape(Capsule())
+        default:
+            return AnyShape(Circle())
+        }
+    }
+}
+
+struct AnyShape: Shape {
+    private let path: (CGRect) -> Path
+
+    init<S: Shape>(_ shape: S) {
+        self.path = { rect in shape.path(in: rect) }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        path(rect)
     }
 }
 

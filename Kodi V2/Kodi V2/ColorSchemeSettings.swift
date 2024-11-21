@@ -2,11 +2,14 @@ import SwiftUI
 
 class ColorSchemeSettings: ObservableObject {
     @Published var buttonColor: Color
+    @Published var buttonShape: String
     
     private let buttonColorKey = "buttonColorKey"
+    private let buttonShapeKey = "buttonShapeKey"
     
     init() {
-        self.buttonColor = ColorSchemeSettings.loadButtonColor() // Use static method
+        self.buttonColor = ColorSchemeSettings.loadButtonColor()
+        self.buttonShape = ColorSchemeSettings.loadButtonShape()
     }
     
     private func saveButtonColor() {
@@ -24,11 +27,29 @@ class ColorSchemeSettings: ObservableObject {
         return Color(uiColor)
     }
     
+    private func saveButtonShape() {
+        UserDefaults.standard.set(buttonShape, forKey: buttonShapeKey)
+        UserDefaults.standard.synchronize() // Force synchronization
+    }
+    
+    static func loadButtonShape() -> String {
+        return UserDefaults.standard.string(forKey: "buttonShapeKey") ?? "Circle" // Default to Circle
+    }
+    
+    
     var color: Color {
         get { buttonColor }
         set {
             buttonColor = newValue
             saveButtonColor()
+        }
+    }
+    
+    var shape: String {
+        get { buttonShape }
+        set {
+            buttonShape = newValue
+            saveButtonShape()
         }
     }
 }
