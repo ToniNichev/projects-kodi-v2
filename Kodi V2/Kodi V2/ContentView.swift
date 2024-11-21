@@ -48,8 +48,9 @@ struct ContentView: View {
                             .font(.title)
                             .foregroundColor(.white)
                             .padding()
-                            .background(Color.gray.opacity(0.7))
+                            .background(colorSchemeSettings.buttonColor) // Updated color scheme
                             .clipShape(Circle())
+                            .shadow(radius: 5)
                     }
                 }
                 .padding(.horizontal)
@@ -72,12 +73,12 @@ struct ContentView: View {
 
                         Button(action: { kodiClient.sendSelectAction() }) {
                             Circle()
-                                .fill(colorSchemeSettings.buttonColor.opacity(0.2))
+                                .fill(colorSchemeSettings.buttonColor)
                                 .frame(width: 60, height: 60)
                                 .overlay(
                                     Text("OK")
                                         .font(.headline)
-                                        .foregroundColor(colorSchemeSettings.buttonColor)
+                                        .foregroundColor(.white)
                                 )
                                 .shadow(radius: 5)
                         }
