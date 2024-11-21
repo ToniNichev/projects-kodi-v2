@@ -12,8 +12,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             // Background image
-            if let thumbnail = kodiClient.currentThumbnail,
-               let thumbnailURL = URL(string: "http://10.0.1.119:8080/image/\(thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")") {
+            if let thumbnailURL = kodiClient.getThumbnailURL() {
                 AsyncImage(url: thumbnailURL) { image in
                     image
                         .resizable()

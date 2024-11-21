@@ -46,6 +46,15 @@ class KodiClient: ObservableObject {
         }
     }
     
+    // Provide a URL for the current thumbnail
+    func getThumbnailURL() -> URL? {
+        guard let thumbnail = currentThumbnail else {
+            return nil
+        }
+        let encodedThumbnail = thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        return URL(string: "http://\(kodiAddress):\(port)/image/\(encodedThumbnail)")
+    }
+    
 
     // MARK: - Common Request and Result Handling
 
