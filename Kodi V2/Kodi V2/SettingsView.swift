@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct SettingsView: View {
     @ObservedObject var kodiClient: KodiClient
@@ -49,6 +50,23 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
+                
+                Section(header: Text("Sound Settings")) {
+                    Toggle("Enable Sounds", isOn: $colorSchemeSettings.buttonEnableSounds)
+
+                    // Use Int binding for the Picker
+                    Picker("Sound Effect", selection: Binding(
+                        get: { Int(colorSchemeSettings.buttonSoundId) }, // Convert SystemSoundID to Int
+                        set: { colorSchemeSettings.buttonSoundId = SystemSoundID($0) } // Convert Int to SystemSoundID
+                    )) {
+                        Text("Tink").tag(1104)
+                        Text("Chord").tag(1105)
+                        Text("Bloom").tag(1107)
+                        Text("Fanfare").tag(1110)
+                        Text("Tweet").tag(1151)
+                    }
+                }
+                
                 Button("Save") {
                     // Save the Kodi server settings
                     kodiClient.kodiAddress = tempKodiAddress
@@ -57,8 +75,10 @@ struct SettingsView: View {
 
                     // Save the color scheme settings
                     colorSchemeSettings.color = colorSchemeSettings.buttonColor
-                    colorSchemeSettings.buttonShape = colorSchemeSettings.buttonShape
-                    colorSchemeSettings.buttonSize = colorSchemeSettings.buttonSize
+                    colorSchemeSettings.shape = colorSchemeSettings.buttonShape
+                    colorSchemeSettings.size = colorSchemeSettings.buttonSize
+                    colorSchemeSettings.soundsEnabled = colorSchemeSettings.buttonEnableSounds
+                    colorSchemeSettings.selectedSound = colorSchemeSettings.buttonSoundId
                     
                     // Dismiss the view
                     presentationMode.wrappedValue.dismiss()

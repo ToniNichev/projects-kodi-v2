@@ -53,7 +53,9 @@ struct ContentView: View {
                         action: { isShowingSettings.toggle() },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                 }
                 .padding(.horizontal)
@@ -66,7 +68,9 @@ struct ContentView: View {
                         action: { kodiClient.sendDirection(.up) },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
 
                     HStack(spacing: 40) {
@@ -75,7 +79,9 @@ struct ContentView: View {
                             action: { kodiClient.sendDirection(.left) },
                             buttonColor: colorSchemeSettings.buttonColor,
                             buttonShape: colorSchemeSettings.buttonShape,
-                            buttonSize: colorSchemeSettings.buttonSize
+                            buttonSize: colorSchemeSettings.buttonSize,
+                            enableSounds: colorSchemeSettings.buttonEnableSounds,
+                            soundID: colorSchemeSettings.buttonSoundId
                         )
 
                         Button(action: { kodiClient.sendSelectAction() }) {
@@ -95,7 +101,9 @@ struct ContentView: View {
                             action: { kodiClient.sendDirection(.right) },
                             buttonColor: colorSchemeSettings.buttonColor,
                             buttonShape: colorSchemeSettings.buttonShape,
-                            buttonSize: colorSchemeSettings.buttonSize
+                            buttonSize: colorSchemeSettings.buttonSize,
+                            enableSounds: colorSchemeSettings.buttonEnableSounds,
+                            soundID: colorSchemeSettings.buttonSoundId
                         )
                     }
 
@@ -104,7 +112,9 @@ struct ContentView: View {
                         action: { kodiClient.sendDirection(.down) },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                 }
 
@@ -178,28 +188,36 @@ struct ContentView: View {
                         action: { kodiClient.rewind() },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                     ControlButton(
                         imageName: "playpause.fill",
                         action: { kodiClient.togglePlayPause() },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                     ControlButton(
                         imageName: "stop.fill",
                         action: { kodiClient.stopPlayback() },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                     ControlButton(
                         imageName: "forward.fill",
                         action: { kodiClient.fastForward() },
                         buttonColor: colorSchemeSettings.buttonColor,
                         buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize
+                        buttonSize: colorSchemeSettings.buttonSize,
+                        enableSounds: colorSchemeSettings.buttonEnableSounds,
+                        soundID: colorSchemeSettings.buttonSoundId
                     )
                 }
                 .padding(.bottom, 20)
@@ -266,39 +284,6 @@ struct ContentView: View {
     func stopTimer() {
         timer?.invalidate()
         timer = nil
-    }
-}
-
-struct ControlButton: View {
-    let imageName: String
-    let action: () -> Void
-    let buttonColor: Color
-    let buttonShape: String
-    let buttonSize: CGFloat
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: imageName)
-                .font(.title)
-                .foregroundColor(.white)
-                .frame(width: buttonSize, height: buttonSize)
-                .background(buttonColor)
-                .clipShape(getShape())
-                .shadow(radius: 5)
-        }
-    }
-    
-    func getShape() -> AnyShape {
-        switch buttonShape {
-        case "Circle":
-            return AnyShape(Circle())
-        case "Rectangle":
-            return AnyShape(RoundedRectangle(cornerRadius: 10))
-        case "Capsule":
-            return AnyShape(Capsule())
-        default:
-            return AnyShape(Circle())
-        }
     }
 }
 
