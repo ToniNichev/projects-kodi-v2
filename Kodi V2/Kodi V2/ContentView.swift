@@ -35,23 +35,25 @@ struct ContentView: View {
                 Spacer()
                     .frame(height: 10)
                 HStack {
-                    Text(kodiClient.currentMovieTitle)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.top, 40)
-                    Spacer()
-                    Button(action: {
-                        isShowingSettings.toggle()
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(kodiClient.currentMovieTitle)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(.white)
-                            .padding()
-                            .background(colorSchemeSettings.buttonColor) // Updated color scheme
-                            .clipShape(Circle())
-                            .shadow(radius: 5)
+                        Text(kodiClient.currentMovieLabel)
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.7)) // Slightly dimmer text for the label
                     }
+                    .padding(.top, 40)
+
+                    Spacer()
+
+                    ControlButton(
+                        imageName: "gearshape.fill",
+                        action: { isShowingSettings.toggle() },
+                        buttonColor: colorSchemeSettings.buttonColor,
+                        buttonShape: colorSchemeSettings.buttonShape
+                    )
                 }
                 .padding(.horizontal)
 

@@ -16,6 +16,7 @@
         @Published var currentGenre: String = ""
         @Published var currentThumbnail: String? = nil
         @Published var currentMovieTitle: String = "Kodi Remote"
+        @Published var currentMovieLabel: String = ""
         
         private let kodiAddressKey = "kodiAddressKey"
         private let portKey = "portKey"
@@ -248,27 +249,35 @@
                 "method": "Player.GetItem",
                 "params": [
                     "playerid": playerID,
-                    "properties": ["title", "artist", "album", "genre", "thumbnail", "fanart", "year", "rating"]
+                    "properties": ["title", "year", "genre", "thumbnail"]
                 ],
                 "id": 1
             ]
             
             makeKodiRequest(with: body) { data in
+                // Check if the result exists and contains the expected structure
                 if let result = data["result"] as? [String: Any],
                    let item = result["item"] as? [String: Any] {
                     
-                    // Parse metadata
-                    let title = item["title"] as? String ?? item["label"] as? String ?? "Unknown Title"
+                    // Safely parse metadata
+                    let title = item["title"] as? String ?? "Unknown Title"
+                    let label = item["label"] as? String ?? "Unknown Label"
                     let thumbnail = item["thumbnail"] as? String
                     let year = item["year"] as? Int
-                    let genre = item["genre"] as? [String]
+                    let genre = (item["genre"] as? [String])?.joined(separator: ", ") ?? "Unknown Genre"
                     
                     DispatchQueue.main.async {
-                        // Update published properties for UI binding
+                        // Update @Published properties for UI binding
                         self.currentMovieTitle = title
+                        self.currentMovieLabel = label
                         self.currentYear = year
-                        self.currentGenre = genre?.joined(separator: ", ") ?? "Unknown Genre"
+                        self.currentGenre = genre
                         self.currentThumbnail = thumbnail
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Failed to fetch item details. Invalid response."
+                        self.showErrorAlert = true
                     }
                 }
             }

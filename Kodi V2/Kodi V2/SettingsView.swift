@@ -26,6 +26,19 @@ struct SettingsView: View {
                     TextField("Port", value: $tempPort, formatter: NumberFormatter())
                         .keyboardType(.numberPad)
                 }
+                
+                Section(header: Text("Button Appearance")) {
+                    ColorPicker("Select Button Color", selection: $colorSchemeSettings.buttonColor)
+                        .padding()
+
+                    Picker("Button Shape", selection: $colorSchemeSettings.buttonShape) {
+                        Text("Circle").tag("Circle")
+                        Text("Rectangle").tag("Rectangle")
+                        Text("Capsule").tag("Capsule")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
+                }
                 Button("Save") {
                     // Save the Kodi server settings
                     kodiClient.kodiAddress = tempKodiAddress
@@ -41,19 +54,6 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity)
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
-                
-                Section(header: Text("Button Appearance")) {
-                    ColorPicker("Select Button Color", selection: $colorSchemeSettings.buttonColor)
-                        .padding()
-
-                    Picker("Button Shape", selection: $colorSchemeSettings.buttonShape) {
-                        Text("Circle").tag("Circle")
-                        Text("Rectangle").tag("Rectangle")
-                        Text("Capsule").tag("Capsule")
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding()
-                }
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -63,6 +63,8 @@ struct SettingsView: View {
                     }
                 }
             }
+            
+            
         }
     }
 }
