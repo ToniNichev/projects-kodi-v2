@@ -65,6 +65,8 @@ struct SettingsView: View {
                         Text("Fanfare").tag(1110)
                         Text("Tweet").tag(1151)
                     }
+                    
+                    Toggle("Enable Vibration", isOn: $colorSchemeSettings.enableVibration)
                 }
                 
                 Button("Save") {

@@ -55,7 +55,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                 }
                 .padding(.horizontal)
@@ -70,7 +71,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
 
                     HStack(spacing: 40) {
@@ -81,7 +83,8 @@ struct ContentView: View {
                             buttonShape: colorSchemeSettings.buttonShape,
                             buttonSize: colorSchemeSettings.buttonSize,
                             enableSounds: colorSchemeSettings.buttonEnableSounds,
-                            soundID: colorSchemeSettings.buttonSoundId
+                            soundID: colorSchemeSettings.buttonSoundId,
+                            enableVibration: colorSchemeSettings.enableVibration
                         )
 
                         Button(action: { kodiClient.sendSelectAction() }) {
@@ -103,7 +106,8 @@ struct ContentView: View {
                             buttonShape: colorSchemeSettings.buttonShape,
                             buttonSize: colorSchemeSettings.buttonSize,
                             enableSounds: colorSchemeSettings.buttonEnableSounds,
-                            soundID: colorSchemeSettings.buttonSoundId
+                            soundID: colorSchemeSettings.buttonSoundId,
+                            enableVibration: colorSchemeSettings.enableVibration
                         )
                     }
 
@@ -114,7 +118,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                 }
 
@@ -190,7 +195,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                     ControlButton(
                         imageName: "playpause.fill",
@@ -199,7 +205,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                     ControlButton(
                         imageName: "stop.fill",
@@ -208,7 +215,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                     ControlButton(
                         imageName: "forward.fill",
@@ -217,7 +225,8 @@ struct ContentView: View {
                         buttonShape: colorSchemeSettings.buttonShape,
                         buttonSize: colorSchemeSettings.buttonSize,
                         enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId
+                        soundID: colorSchemeSettings.buttonSoundId,
+                        enableVibration: colorSchemeSettings.enableVibration
                     )
                 }
                 .padding(.bottom, 20)

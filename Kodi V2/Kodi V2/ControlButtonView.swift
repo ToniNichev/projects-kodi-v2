@@ -9,10 +9,14 @@ struct ControlButton: View {
     let buttonSize: CGFloat
     let enableSounds: Bool
     let soundID: SystemSoundID
+    let enableVibration: Bool
     // private let soundPlayer = SoundPlayer() // Create an instance of SoundPlayer
     
     var body: some View {
         Button(action: {
+            if enableVibration {
+                triggerVibration()
+            }
             if enableSounds {
                 // soundPlayer.playSound(named: soundName)
                 AudioServicesPlaySystemSound(soundID) // Play system sound
@@ -41,6 +45,11 @@ struct ControlButton: View {
             return AnyShape(Circle())
         }
     }
+    
+    private func triggerVibration() {
+        let generator = UIImpactFeedbackGenerator(style: .medium) // Choose the feedback style
+        generator.impactOccurred()
+    }
 }
 
 #Preview {
@@ -50,5 +59,6 @@ struct ControlButton: View {
                   buttonShape: "Circle",
                   buttonSize: 50,
                   enableSounds: true,
-                  soundID: 1104)
+                  soundID: 1104,
+                  enableVibration: false)
 }
