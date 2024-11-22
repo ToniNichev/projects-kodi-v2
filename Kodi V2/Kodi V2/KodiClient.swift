@@ -20,6 +20,7 @@
         
         private let kodiAddressKey = "kodiAddressKey"
         private let portKey = "portKey"
+        private let currentVolumeKey = "currentVolumeKey"
 
         private var timer: Timer?
 
@@ -37,6 +38,7 @@
         func saveSettings() {
             UserDefaults.standard.set(kodiAddress, forKey: kodiAddressKey)
             UserDefaults.standard.set(port, forKey: portKey)
+            UserDefaults.standard.set(currentVolume, forKey: currentVolumeKey)
         }
 
         func loadSettings() {
@@ -45,6 +47,9 @@
             }
             if let savedPort = UserDefaults.standard.value(forKey: portKey) as? Int {
                 port = savedPort
+            }
+            if let savedVolume = UserDefaults.standard.value(forKey: currentVolumeKey) as? Int {
+                currentVolume = savedVolume
             }
         }
         

@@ -38,6 +38,16 @@ struct SettingsView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding()
+                    
+                    Slider(value: $colorSchemeSettings.buttonSize, in: 50...85, step: 1) {
+                        Text("Button Size")
+                    }
+                    .padding()
+                    .accentColor(colorSchemeSettings.buttonColor)
+                    
+                    Text("Size: \(Int(colorSchemeSettings.buttonSize)) px")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
                 Button("Save") {
                     // Save the Kodi server settings
@@ -47,6 +57,8 @@ struct SettingsView: View {
 
                     // Save the color scheme settings
                     colorSchemeSettings.color = colorSchemeSettings.buttonColor
+                    colorSchemeSettings.buttonShape = colorSchemeSettings.buttonShape
+                    colorSchemeSettings.buttonSize = colorSchemeSettings.buttonSize
                     
                     // Dismiss the view
                     presentationMode.wrappedValue.dismiss()

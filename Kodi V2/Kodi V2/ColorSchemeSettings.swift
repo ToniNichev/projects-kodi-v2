@@ -3,13 +3,16 @@ import SwiftUI
 class ColorSchemeSettings: ObservableObject {
     @Published var buttonColor: Color
     @Published var buttonShape: String
+    @Published var buttonSize: CGFloat = 70 // Default size
     
     private let buttonColorKey = "buttonColorKey"
     private let buttonShapeKey = "buttonShapeKey"
+    private let buttonSizeKey = "buttonSizeKey"
     
     init() {
         self.buttonColor = ColorSchemeSettings.loadButtonColor()
         self.buttonShape = ColorSchemeSettings.loadButtonShape()
+        self.buttonSize = loadButtonSize()
     }
     
     private func saveButtonColor() {
@@ -36,6 +39,16 @@ class ColorSchemeSettings: ObservableObject {
         return UserDefaults.standard.string(forKey: "buttonShapeKey") ?? "Circle" // Default to Circle
     }
     
+    private func saveButtonSize() {
+        UserDefaults.standard.set(buttonSize, forKey: buttonSizeKey)
+    }
+
+    private func loadButtonSize() -> CGFloat {
+        return CGFloat(UserDefaults.standard.double(forKey: buttonSizeKey)) > 0 ?
+            CGFloat(UserDefaults.standard.double(forKey: buttonSizeKey)) :
+            70 // Default size
+    }
+    
     
     var color: Color {
         get { buttonColor }
@@ -50,6 +63,14 @@ class ColorSchemeSettings: ObservableObject {
         set {
             buttonShape = newValue
             saveButtonShape()
+        }
+    }
+    
+    var size: CGFloat {
+        get { buttonSize }
+        set {
+            buttonSize = newValue
+            saveButtonSize()
         }
     }
 }

@@ -52,7 +52,8 @@ struct ContentView: View {
                         imageName: "gearshape.fill",
                         action: { isShowingSettings.toggle() },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                 }
                 .padding(.horizontal)
@@ -64,7 +65,8 @@ struct ContentView: View {
                         imageName: "chevron.up",
                         action: { kodiClient.sendDirection(.up) },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
 
                     HStack(spacing: 40) {
@@ -72,7 +74,8 @@ struct ContentView: View {
                             imageName: "chevron.left",
                             action: { kodiClient.sendDirection(.left) },
                             buttonColor: colorSchemeSettings.buttonColor,
-                            buttonShape: colorSchemeSettings.buttonShape
+                            buttonShape: colorSchemeSettings.buttonShape,
+                            buttonSize: colorSchemeSettings.buttonSize
                         )
 
                         Button(action: { kodiClient.sendSelectAction() }) {
@@ -91,7 +94,8 @@ struct ContentView: View {
                             imageName: "chevron.right",
                             action: { kodiClient.sendDirection(.right) },
                             buttonColor: colorSchemeSettings.buttonColor,
-                            buttonShape: colorSchemeSettings.buttonShape
+                            buttonShape: colorSchemeSettings.buttonShape,
+                            buttonSize: colorSchemeSettings.buttonSize
                         )
                     }
 
@@ -99,7 +103,8 @@ struct ContentView: View {
                         imageName: "chevron.down",
                         action: { kodiClient.sendDirection(.down) },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                 }
 
@@ -172,25 +177,29 @@ struct ContentView: View {
                         imageName: "backward.fill",
                         action: { kodiClient.rewind() },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                     ControlButton(
                         imageName: "playpause.fill",
                         action: { kodiClient.togglePlayPause() },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                     ControlButton(
                         imageName: "stop.fill",
                         action: { kodiClient.stopPlayback() },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                     ControlButton(
                         imageName: "forward.fill",
                         action: { kodiClient.fastForward() },
                         buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape
+                        buttonShape: colorSchemeSettings.buttonShape,
+                        buttonSize: colorSchemeSettings.buttonSize
                     )
                 }
                 .padding(.bottom, 20)
@@ -265,13 +274,14 @@ struct ControlButton: View {
     let action: () -> Void
     let buttonColor: Color
     let buttonShape: String
+    let buttonSize: CGFloat
     
     var body: some View {
         Button(action: action) {
             Image(systemName: imageName)
                 .font(.title)
                 .foregroundColor(.white)
-                .frame(width: 70, height: 70)
+                .frame(width: buttonSize, height: buttonSize)
                 .background(buttonColor)
                 .clipShape(getShape())
                 .shadow(radius: 5)
