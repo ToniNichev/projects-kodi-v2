@@ -177,6 +177,19 @@
                 print("Back action sent:", data)
             }
         }
+        
+        func sendTextInput(_ text: String) {
+            let body: [String: Any] = [
+                "jsonrpc": "2.0",
+                "method": "Input.SendText",
+                "params": ["text": text, "done": true],
+                "id": 1
+            ]
+            
+            makeKodiRequest(with: body) { data in
+                print("Text input sent:", data)
+            }
+        }
 
         func setKodiPlaybackPosition(_ position: Double) {
             let percentage = (position / totalDuration) * 100

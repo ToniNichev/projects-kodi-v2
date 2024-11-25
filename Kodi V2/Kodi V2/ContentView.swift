@@ -8,6 +8,8 @@ struct ContentView: View {
     @State private var timer: Timer? = nil
     @State private var isShowingSettings = false
     @State private var isShowingColorPicker = false // State for showing color picker
+    @State private var isShowingTextInput = false // Controls showing the text input modal
+    @State private var enteredText = "" // Holds the entered text
 
     var body: some View {
         ZStack {
@@ -116,7 +118,7 @@ struct ContentView: View {
                         // Left Back Button
                         ControlButton(
                             imageName: "arrowshape.turn.up.left.fill", // Back icon
-                            action: { kodiClient.sendBackAction() }, // Implement the back action in KodiClient
+                            action: { kodiClient.sendBackAction() },
                             buttonColor: colorSchemeSettings.buttonColor,
                             buttonShape: colorSchemeSettings.buttonShape,
                             buttonSize: colorSchemeSettings.buttonSize,
@@ -139,10 +141,10 @@ struct ContentView: View {
                             enableVibration: colorSchemeSettings.enableVibration
                         )
 
-                        // Right Back Button
+                        // Enter Text Button
                         ControlButton(
-                            imageName: "arrowshape.turn.up.left.fill", // Back icon
-                            action: { kodiClient.sendBackAction() }, // Implement the back action in KodiClient
+                            imageName: "keyboard.fill", // Keyboard icon
+                            action: { isShowingTextInput.toggle() }, // Show text input modal
                             buttonColor: colorSchemeSettings.buttonColor,
                             buttonShape: colorSchemeSettings.buttonShape,
                             buttonSize: colorSchemeSettings.buttonSize,
@@ -152,6 +154,35 @@ struct ContentView: View {
                         )
                         .padding(.leading, 30) // Align under Right Arrow
                         .padding(.top, 20)      // Add space above the button
+                        .sheet(isPresented: $isShowingTextInput) {
+                            VStack {
+                                Text("Enter Text")
+                                    .font(.headline)
+                                    .padding()
+
+                                TextField("Type something...", text: $enteredText)
+                                    .textFieldStyle(.roundedBorder)
+                                    .padding()
+                                    .frame(maxWidth: 300)
+
+                                Button("Submit") {
+                                    // Handle the entered text
+                                    kodiClient.sendTextInput(enteredText)
+                                    isShowingTextInput = false
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .padding()
+
+                                Button("Cancel") {
+                                    isShowingTextInput = false
+                                }
+                                .padding(.top, 10)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(.systemGray6))
+                            .ignoresSafeArea()
+                        }
 
                         Spacer()
                     }
