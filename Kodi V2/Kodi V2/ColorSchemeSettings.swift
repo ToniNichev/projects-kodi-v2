@@ -7,7 +7,7 @@ class ColorSchemeSettings: ObservableObject {
     @Published var buttonSize: CGFloat
     @Published var buttonEnableSounds: Bool
     @Published var buttonSoundId: SystemSoundID
-    @Published var enableVibration: Bool
+    @Published var buttonEnableVibration: Bool
     
     private static let keys: [String: String] = [
         "buttonColor": "buttonColorKey",
@@ -15,7 +15,7 @@ class ColorSchemeSettings: ObservableObject {
         "buttonSize": "buttonSizeKey",
         "buttonEnableSounds": "enableSoundsKey",
         "buttonSoundId": "soundIdKey",
-        "enableVibration": "enableVibrationKey"
+        "buttonEnableVibration": "enableVibrationKey"
     ]
     
     init() {
@@ -24,7 +24,7 @@ class ColorSchemeSettings: ObservableObject {
         self.buttonSize = ColorSchemeSettings.loadProperty(forKey: ColorSchemeSettings.keys["buttonSize"]!, defaultValue: 70)
         self.buttonEnableSounds = ColorSchemeSettings.loadProperty(forKey: ColorSchemeSettings.keys["buttonEnableSounds"]!, defaultValue: true)
         self.buttonSoundId = ColorSchemeSettings.loadProperty(forKey: ColorSchemeSettings.keys["buttonSoundId"]!, defaultValue: SystemSoundID(1107))
-        self.enableVibration = ColorSchemeSettings.loadProperty(forKey: ColorSchemeSettings.keys["enableVibration"]!, defaultValue: true)
+        self.buttonEnableVibration = ColorSchemeSettings.loadProperty(forKey: ColorSchemeSettings.keys["buttonEnableVibration"]!, defaultValue: true)
     }
     
     // MARK: - Load Methods
@@ -122,4 +122,13 @@ class ColorSchemeSettings: ObservableObject {
             saveProperty(value: newValue, forKey: ColorSchemeSettings.keys["buttonSoundId"]!)
         }
     }
+    
+    var enableVibration: Bool {
+        get { buttonEnableVibration }
+        set {
+            buttonEnableVibration = newValue
+            saveProperty(value: newValue, forKey: ColorSchemeSettings.keys["buttonEnableVibration"]!)
+        }
+    }
+    
 }

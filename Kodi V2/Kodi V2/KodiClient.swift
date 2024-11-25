@@ -165,6 +165,18 @@
                 }
             }
         }
+        
+        func sendBackAction() {
+            let body: [String: Any] = [
+                "jsonrpc": "2.0",
+                "method": "Input.Back",
+                "id": 1
+            ]
+            
+            makeKodiRequest(with: body) { data in
+                print("Back action sent:", data)
+            }
+        }
 
         func setKodiPlaybackPosition(_ position: Double) {
             let percentage = (position / totalDuration) * 100

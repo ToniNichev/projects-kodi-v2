@@ -76,6 +76,7 @@ struct ContentView: View {
                     )
 
                     HStack(spacing: 40) {
+                        // Left Arrow
                         ControlButton(
                             imageName: "chevron.left",
                             action: { kodiClient.sendDirection(.left) },
@@ -110,17 +111,50 @@ struct ContentView: View {
                             enableVibration: colorSchemeSettings.enableVibration
                         )
                     }
+                    HStack {
+                        Spacer()
+                        // Left Back Button
+                        ControlButton(
+                            imageName: "arrowshape.turn.up.left.fill", // Back icon
+                            action: { kodiClient.sendBackAction() }, // Implement the back action in KodiClient
+                            buttonColor: colorSchemeSettings.buttonColor,
+                            buttonShape: colorSchemeSettings.buttonShape,
+                            buttonSize: colorSchemeSettings.buttonSize,
+                            enableSounds: colorSchemeSettings.buttonEnableSounds,
+                            soundID: colorSchemeSettings.buttonSoundId,
+                            enableVibration: colorSchemeSettings.enableVibration
+                        )
+                        .padding(.trailing, 30) // Align under Left Arrow
+                        .padding(.top, 20)      // Add space above the button
 
-                    ControlButton(
-                        imageName: "chevron.down",
-                        action: { kodiClient.sendDirection(.down) },
-                        buttonColor: colorSchemeSettings.buttonColor,
-                        buttonShape: colorSchemeSettings.buttonShape,
-                        buttonSize: colorSchemeSettings.buttonSize,
-                        enableSounds: colorSchemeSettings.buttonEnableSounds,
-                        soundID: colorSchemeSettings.buttonSoundId,
-                        enableVibration: colorSchemeSettings.enableVibration
-                    )
+                        // Down Button
+                        ControlButton(
+                            imageName: "chevron.down",
+                            action: { kodiClient.sendDirection(.down) },
+                            buttonColor: colorSchemeSettings.buttonColor,
+                            buttonShape: colorSchemeSettings.buttonShape,
+                            buttonSize: colorSchemeSettings.buttonSize,
+                            enableSounds: colorSchemeSettings.buttonEnableSounds,
+                            soundID: colorSchemeSettings.buttonSoundId,
+                            enableVibration: colorSchemeSettings.enableVibration
+                        )
+
+                        // Right Back Button
+                        ControlButton(
+                            imageName: "arrowshape.turn.up.left.fill", // Back icon
+                            action: { kodiClient.sendBackAction() }, // Implement the back action in KodiClient
+                            buttonColor: colorSchemeSettings.buttonColor,
+                            buttonShape: colorSchemeSettings.buttonShape,
+                            buttonSize: colorSchemeSettings.buttonSize,
+                            enableSounds: colorSchemeSettings.buttonEnableSounds,
+                            soundID: colorSchemeSettings.buttonSoundId,
+                            enableVibration: colorSchemeSettings.enableVibration
+                        )
+                        .padding(.leading, 30) // Align under Right Arrow
+                        .padding(.top, 20)      // Add space above the button
+
+                        Spacer()
+                    }
                 }
 
                 Spacer()
