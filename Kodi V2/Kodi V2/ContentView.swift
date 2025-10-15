@@ -32,60 +32,40 @@ struct ContentView: View {
             }
 
             // Foreground content
-            VStack(spacing: 40) {
+            VStack(spacing: 30) {
                 Spacer()
-                    .frame(height: 10)
-                HStack {
-                    VStack(alignment: .leading, spacing: 8) {
+                    .frame(height: 20)
+                
+                // Header with title and metadata
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 12) {
                         Text(kodiClient.currentMovieTitle)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.white, .white.opacity(0.9)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .lineLimit(2)
+                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
                         
-                        // Media metadata (year, genre)
+                        // Media metadata badges
                         if kodiClient.totalDuration > 0 {
                             HStack(spacing: 8) {
-                                // Year
                                 if let year = kodiClient.currentYear {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "calendar")
-                                            .font(.caption)
-                                        Text(String(year))
-                                            .font(.subheadline)
-                                    }
-                                    .foregroundColor(.white.opacity(0.9))
+                                    InfoBadge(icon: "calendar", text: String(year))
                                 }
                                 
-                                // Separator
-                                if kodiClient.currentYear != nil && !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
-                                    Text("•")
-                                        .foregroundColor(.white.opacity(0.6))
-                                }
-                                
-                                // Genre
                                 if !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "film")
-                                            .font(.caption)
-                                        Text(kodiClient.currentGenre)
-                                            .font(.subheadline)
-                                            .lineLimit(1)
-                                    }
-                                    .foregroundColor(.white.opacity(0.9))
+                                    InfoBadge(icon: "film", text: kodiClient.currentGenre)
                                 }
                             }
                         }
                         
-                        // Connection status indicator
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(kodiClient.isConnected ? Color.green : Color.red)
-                                .frame(width: 8, height: 8)
-                            Text(kodiClient.isConnected ? "Connected" : "Disconnected")
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
+                        // Connection status
+                        ConnectionBadge(isConnected: kodiClient.isConnected)
                     }
                     .padding(.top, 40)
                     
@@ -121,33 +101,37 @@ struct ContentView: View {
 
                 Spacer()
                 
-                // Volume controls (conditional)
+                // Volume controls (conditional) with glassmorphism
                 if showVolumeControls {
-                    HStack(spacing: 20) {
-                        ControlButton(imageName: "speaker.fill", action: {
+                    VolumeControlPanel(
+                        onMute: {
                             performHaptic(.medium)
                             kodiClient.toggleMute()
-                        }, size: 50)
-                        ControlButton(imageName: "minus", action: {
+                        },
+                        onVolumeDown: {
                             performHaptic(.light)
                             kodiClient.volumeDown()
-                        }, size: 50)
-                        ControlButton(imageName: "plus", action: {
+                        },
+                        onVolumeUp: {
                             performHaptic(.light)
                             kodiClient.volumeUp()
-                        }, size: 50)
-                    }
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                    )
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.8)),
+                        removal: .move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0.8))
+                    ))
                 }
 
+                // Navigation pad with modern design
                 VStack(spacing: 20) {
-                    ControlButton(imageName: "chevron.up", action: {
+                    ModernControlButton(imageName: "chevron.up", action: {
                         performHaptic(.light)
                         kodiClient.sendDirection(.up)
                     })
 
                     HStack(spacing: 40) {
-                        ControlButton(imageName: "chevron.left", action: {
+                        ModernControlButton(imageName: "chevron.left", action: {
                             performHaptic(.light)
                             kodiClient.sendDirection(.left)
                         })
@@ -156,108 +140,100 @@ struct ContentView: View {
                             performHaptic(.medium)
                             kodiClient.sendSelectAction()
                         }) {
-                            Circle()
-                                .fill(Color.blue.opacity(0.2))
-                                .frame(width: 60, height: 60)
-                                .overlay(
-                                    Text("OK")
-                                        .font(.headline)
-                                        .foregroundColor(.blue)
-                                )
-                                .shadow(radius: 5)
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [.blue, .cyan],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 70, height: 70)
+                                
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .frame(width: 60, height: 60)
+                                
+                                Text("OK")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [.blue, .cyan],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            }
+                            .shadow(color: Color.blue.opacity(0.4), radius: 10, x: 0, y: 5)
                         }
 
-                        ControlButton(imageName: "chevron.right", action: {
+                        ModernControlButton(imageName: "chevron.right", action: {
                             performHaptic(.light)
                             kodiClient.sendDirection(.right)
                         })
                     }
 
-                    ControlButton(imageName: "chevron.down", action: {
+                    ModernControlButton(imageName: "chevron.down", action: {
                         performHaptic(.light)
                         kodiClient.sendDirection(.down)
                     })
                 }
                 
-                // Navigation buttons (Back, Home)
-                HStack(spacing: 20) {
-                    ControlButton(imageName: "chevron.backward", action: {
+                // Navigation buttons with glassmorphism
+                HStack(spacing: 16) {
+                    ModernControlButton(imageName: "chevron.backward", action: {
                         performHaptic(.medium)
                         kodiClient.sendInputAction(.back)
-                    }, size: 50)
-                    ControlButton(imageName: "house.fill", action: {
+                    }, size: 50, color: .indigo)
+                    
+                    ModernControlButton(imageName: "house.fill", action: {
                         performHaptic(.medium)
                         kodiClient.sendInputAction(.home)
-                    }, size: 50)
-                    ControlButton(imageName: "list.bullet", action: {
+                    }, size: 50, color: .indigo)
+                    
+                    ModernControlButton(imageName: "list.bullet", action: {
                         performHaptic(.medium)
                         kodiClient.sendInputAction(.contextMenu)
-                    }, size: 50)
+                    }, size: 50, color: .indigo)
                 }
 
                 Spacer()
 
+                // Playback progress or empty states
                 VStack(spacing: 10) {
                     if kodiClient.isLoading {
-                        HStack {
-                            ProgressView()
-                                .tint(.white)
-                            Text("Loading...")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 20)
+                        LoadingStateView()
+                            .padding(.horizontal, 20)
                     } else if kodiClient.totalDuration > 0 {
-                        HStack {
-                            Text(formatTime(kodiClient.playbackPosition))
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            Spacer()
-                            Text(formatTime(kodiClient.totalDuration))
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.horizontal, 20)
-                        Slider(
-                            value: $kodiClient.playbackPosition,
-                            in: 0...kodiClient.totalDuration,
-                            step: 1.0,
-                            onEditingChanged: { editing in
-                                isDraggingSlider = editing
-                                if !editing {
-                                    performHaptic(.light)
-                                    kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
-                                }
-                            }
+                        ProgressCard(
+                            currentTime: formatTime(kodiClient.playbackPosition),
+                            totalTime: formatTime(kodiClient.totalDuration),
+                            progress: kodiClient.playbackPosition,
+                            total: kodiClient.totalDuration,
+                            onSeek: { newPosition in
+                                performHaptic(.light)
+                                kodiClient.setKodiPlaybackPosition(newPosition)
+                            },
+                            isDragging: $isDraggingSlider
                         )
-                        .tint(.blue)
                         .padding(.horizontal, 20)
                     } else if kodiClient.kodiAddress.isEmpty {
-                        VStack(spacing: 8) {
-                            Image(systemName: "network.slash")
-                                .font(.largeTitle)
-                                .foregroundColor(.gray)
-                            Text("No server configured")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            Button(action: {
-                                isShowingSettings = true
-                            }) {
-                                Text("Configure Server")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                            }
-                        }
+                        EmptyStateView(
+                            icon: "network.slash",
+                            title: "No Server Configured",
+                            subtitle: "Connect to your Kodi server to start controlling playback",
+                            action: { isShowingSettings = true },
+                            actionTitle: "Configure Server"
+                        )
                         .padding(.horizontal, 20)
                     } else {
-                        VStack(spacing: 8) {
-                            Image(systemName: "play.slash")
-                                .font(.largeTitle)
-                                .foregroundColor(.gray)
-                            Text("No active playback")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
+                        EmptyStateView(
+                            icon: "play.rectangle",
+                            title: "No Active Playback",
+                            subtitle: "Start playing media on your Kodi server"
+                        )
                         .padding(.horizontal, 20)
                     }
                 }
@@ -268,23 +244,27 @@ struct ContentView: View {
                     stopTimer()
                 }
 
+                // Playback controls with glassmorphism
                 HStack(spacing: 20) {
-                    ControlButton(imageName: "backward.fill", action: {
+                    ModernControlButton(imageName: "gobackward.30", action: {
                         performHaptic(.medium)
                         kodiClient.rewind()
-                    })
-                    ControlButton(imageName: "playpause.fill", action: {
+                    }, size: 60, color: .green)
+                    
+                    ModernControlButton(imageName: "playpause.fill", action: {
                         performHaptic(.medium)
                         kodiClient.togglePlayPause()
-                    })
-                    ControlButton(imageName: "stop.fill", action: {
+                    }, size: 70, color: .green)
+                    
+                    ModernControlButton(imageName: "stop.fill", action: {
                         performHaptic(.heavy)
                         kodiClient.stopPlayback()
-                    })
-                    ControlButton(imageName: "forward.fill", action: {
+                    }, size: 60, color: .red)
+                    
+                    ModernControlButton(imageName: "goforward.30", action: {
                         performHaptic(.medium)
                         kodiClient.fastForward()
-                    })
+                    }, size: 60, color: .green)
                 }
                 .padding(.bottom, 20)
             }
