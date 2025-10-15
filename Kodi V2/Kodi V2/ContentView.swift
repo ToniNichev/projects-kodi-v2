@@ -72,32 +72,62 @@ struct ContentView: View {
                     Spacer()
                     
                     VStack(spacing: 12) {
+                        // Settings button with modern design
                         Button(action: {
                             performHaptic(.light)
                             isShowingSettings.toggle()
                         }) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.gray.opacity(0.7))
-                                .clipShape(Circle())
+                            ZStack {
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .frame(width: 50, height: 50)
+                                
+                                Image(systemName: "gearshape.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [.white, .gray],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            }
+                            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
                         }
                         
+                        // Volume toggle button with modern design
                         Button(action: {
                             performHaptic(.light)
-                            showVolumeControls.toggle()
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                showVolumeControls.toggle()
+                            }
                         }) {
-                            Image(systemName: showVolumeControls ? "speaker.wave.3.fill" : "speaker.wave.2.fill")
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(showVolumeControls ? Color.blue.opacity(0.7) : Color.gray.opacity(0.7))
-                                .clipShape(Circle())
+                            ZStack {
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                    .frame(width: 50, height: 50)
+                                
+                                Image(systemName: showVolumeControls ? "speaker.wave.3.fill" : "speaker.wave.2.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: showVolumeControls ? [.purple, .pink] : [.white, .gray],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            }
+                            .shadow(
+                                color: showVolumeControls ? Color.purple.opacity(0.3) : Color.black.opacity(0.2),
+                                radius: showVolumeControls ? 10 : 8,
+                                x: 0,
+                                y: 4
+                            )
                         }
                     }
+                    .padding(.trailing, 8)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
 
                 Spacer()
                 
