@@ -234,9 +234,10 @@ struct ContentView: View {
                         kodiClient.fastForward()
                     }, size: 60, color: .green)
                 }
-                .padding(.bottom, 20)
+                .padding(.bottom, 30)  // Extra padding for safe area
             }
             .padding(.horizontal)
+            .padding(.bottom, 10)  // Additional bottom safe area padding
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView(kodiClient: kodiClient) // Present SettingsView
             }
