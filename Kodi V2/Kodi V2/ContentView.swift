@@ -36,11 +36,46 @@ struct ContentView: View {
                 Spacer()
                     .frame(height: 10)
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(kodiClient.currentMovieTitle)
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
+                            .lineLimit(2)
+                        
+                        // Media metadata (year, genre)
+                        if kodiClient.totalDuration > 0 {
+                            HStack(spacing: 8) {
+                                // Year
+                                if let year = kodiClient.currentYear {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "calendar")
+                                            .font(.caption)
+                                        Text(String(year))
+                                            .font(.subheadline)
+                                    }
+                                    .foregroundColor(.white.opacity(0.9))
+                                }
+                                
+                                // Separator
+                                if kodiClient.currentYear != nil && !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
+                                    Text("•")
+                                        .foregroundColor(.white.opacity(0.6))
+                                }
+                                
+                                // Genre
+                                if !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "film")
+                                            .font(.caption)
+                                        Text(kodiClient.currentGenre)
+                                            .font(.subheadline)
+                                            .lineLimit(1)
+                                    }
+                                    .foregroundColor(.white.opacity(0.9))
+                                }
+                            }
+                        }
                         
                         // Connection status indicator
                         HStack(spacing: 6) {
