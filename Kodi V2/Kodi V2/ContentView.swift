@@ -33,97 +33,39 @@ struct ContentView: View {
 
             // Foreground content
             VStack(spacing: 30) {
-                // Header with title and metadata
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(kodiClient.currentMovieTitle)
-                            .font(.system(size: 34, weight: .bold))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.white, .white.opacity(0.9)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                // Header with title and metadata - simplified, no buttons
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(kodiClient.currentMovieTitle)
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.white, .white.opacity(0.9)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
-                            .lineLimit(2)
-                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
-                        
-                        // Media metadata badges
-                        if kodiClient.totalDuration > 0 {
-                            HStack(spacing: 8) {
-                                if let year = kodiClient.currentYear {
-                                    InfoBadge(icon: "calendar", text: String(year))
-                                }
-                                
-                                if !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
-                                    InfoBadge(icon: "film", text: kodiClient.currentGenre)
-                                }
+                        )
+                        .lineLimit(2)
+                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                    
+                    // Media metadata badges
+                    if kodiClient.totalDuration > 0 {
+                        HStack(spacing: 8) {
+                            if let year = kodiClient.currentYear {
+                                InfoBadge(icon: "calendar", text: String(year))
+                            }
+                            
+                            if !kodiClient.currentGenre.isEmpty && kodiClient.currentGenre != "Unknown Genre" {
+                                InfoBadge(icon: "film", text: kodiClient.currentGenre)
                             }
                         }
-                        
-                        // Connection status
-                        ConnectionBadge(isConnected: kodiClient.isConnected)
                     }
                     
-                    Spacer()
-                    
-                    VStack(spacing: 12) {
-                        // Settings button with modern design
-                        Button(action: {
-                            performHaptic(.light)
-                            isShowingSettings.toggle()
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(.ultraThinMaterial)
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: "gearshape.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [.white, .gray],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                            }
-                            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-                        }
-                        
-                        // Volume toggle button with modern design
-                        Button(action: {
-                            performHaptic(.light)
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                showVolumeControls.toggle()
-                            }
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(.ultraThinMaterial)
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: showVolumeControls ? "speaker.wave.3.fill" : "speaker.wave.2.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: showVolumeControls ? [.purple, .pink] : [.white, .gray],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                            }
-                            .shadow(
-                                color: showVolumeControls ? Color.purple.opacity(0.3) : Color.black.opacity(0.2),
-                                radius: showVolumeControls ? 10 : 8,
-                                x: 0,
-                                y: 4
-                            )
-                        }
-                    }
+                    // Connection status
+                    ConnectionBadge(isConnected: kodiClient.isConnected)
                 }
-                .padding(.top, 60)  // Safe area + spacing
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
+                .padding(.top, 20)
 
                 Spacer()
                 
@@ -299,6 +241,71 @@ struct ContentView: View {
                 SettingsView(kodiClient: kodiClient) // Present SettingsView
             }
         }
+        
+        // Floating action buttons (overlay) - Settings (top-left)
+        VStack {
+            HStack {
+                Button(action: {
+                    performHaptic(.light)
+                    isShowingSettings.toggle()
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .frame(width: 50, height: 50)
+                        
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.white, .gray],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .padding(.leading, 20)
+                .padding(.top, 20)
+                
+                Spacer()
+                
+                // Volume toggle button (top-right)
+                Button(action: {
+                    performHaptic(.light)
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        showVolumeControls.toggle()
+                    }
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .frame(width: 50, height: 50)
+                        
+                        Image(systemName: showVolumeControls ? "speaker.wave.3.fill" : "speaker.wave.2.fill")
+                            .font(.title3)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: showVolumeControls ? [.purple, .pink] : [.white, .gray],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    .shadow(
+                        color: showVolumeControls ? Color.purple.opacity(0.4) : Color.black.opacity(0.3),
+                        radius: 10,
+                        x: 0,
+                        y: 5
+                    )
+                }
+                .padding(.trailing, 20)
+                .padding(.top, 20)
+            }
+            Spacer()
+        }
+        
         .onAppear {
             kodiClient.fetchPlaybackInfo()
         }
