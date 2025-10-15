@@ -3,13 +3,14 @@ import SwiftUI
 
 class KodiClient: ObservableObject {
     @Published var port: Int = 8080
-    @Published var kodiAddress: String = "10.0.1.1" // IP only
-    private let playerID = 1
-    @Published var totalDuration: Double = 100.0
+    @Published var kodiAddress: String = "" // IP only
+    @Published var activePlayerID: Int? = nil
+    @Published var totalDuration: Double = 0.0
     @Published var playbackPosition: Double = 0.0
     @Published var showErrorAlert = false
     @Published var errorMessage: String = ""
-    @State var isSeeking: Bool = false
+    @Published var isLoading = false
+    @Published var isConnected = false
 
     @Published var currentYear: Int? = nil
     @Published var currentGenre: String = ""
@@ -20,12 +21,24 @@ class KodiClient: ObservableObject {
     private let portKey = "portKey"
 
     private var timer: Timer?
+    
+    init() {
+        loadSettings()
+        fetchActivePlayers()
+    }
 
     enum Direction: String {
         case up = "Up"
         case down = "Down"
         case left = "Left"
         case right = "Right"
+    }
+    
+    enum InputAction: String {
+        case back = "Back"
+        case home = "Home"
+        case contextMenu = "ContextMenu"
+        case info = "Info"
     }
     
     func saveSettings() {
@@ -118,6 +131,12 @@ class KodiClient: ObservableObject {
     }
 
     func fetchPlaybackInfo() {
+        guard let playerID = activePlayerID else {
+            // No active player, try to fetch active players
+            fetchActivePlayers()
+            return
+        }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.GetProperties",
@@ -126,27 +145,37 @@ class KodiClient: ObservableObject {
         ]
         
         makeKodiRequest(with: body) { data in
-            if let result = data["result"] as? [String: Any],
-               let time = result["time"] as? [String: Int],
-               let totaltime = result["totaltime"] as? [String: Int] {
+            guard let result = data["result"] as? [String: Any],
+                  let time = result["time"] as? [String: Int],
+                  let totaltime = result["totaltime"] as? [String: Int],
+                  let hours = time["hours"],
+                  let minutes = time["minutes"],
+                  let seconds = time["seconds"],
+                  let totalHours = totaltime["hours"],
+                  let totalMinutes = totaltime["minutes"],
+                  let totalSeconds = totaltime["seconds"] else {
+                return
+            }
+            
+            let currentSeconds = Double(hours * 3600 + minutes * 60 + seconds)
+            let totalDurationSeconds = Double(totalHours * 3600 + totalMinutes * 60 + totalSeconds)
+            
+            DispatchQueue.main.async {
+                self.playbackPosition = currentSeconds
+                self.totalDuration = totalDurationSeconds
+                self.isConnected = true
                 
-                let currentSeconds = Double(time["hours"]! * 3600 + time["minutes"]! * 60 + time["seconds"]!)
-                let totalSeconds = Double(totaltime["hours"]! * 3600 + totaltime["minutes"]! * 60 + totaltime["seconds"]!)
-                
-                DispatchQueue.main.async {
-                    self.playbackPosition = currentSeconds
-                    self.totalDuration = totalSeconds
-                    
-                    // Fetch the current item's details if playback is active
-                    if totalSeconds > 0 {
-                        self.fetchCurrentItemDetails()
-                    }
+                // Fetch the current item's details if playback is active
+                if totalDurationSeconds > 0 {
+                    self.fetchCurrentItemDetails()
                 }
             }
         }
     }
 
     func setKodiPlaybackPosition(_ position: Double) {
+        guard let playerID = activePlayerID, totalDuration > 0 else { return }
+        
         let percentage = (position / totalDuration) * 100
         
         let body: [String: Any] = [
@@ -165,6 +194,8 @@ class KodiClient: ObservableObject {
     }
 
     func togglePlayPause() {
+        guard let playerID = activePlayerID else { return }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.PlayPause",
@@ -178,6 +209,8 @@ class KodiClient: ObservableObject {
     }
 
     func rewind() {
+        guard let playerID = activePlayerID else { return }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.Seek",
@@ -191,6 +224,8 @@ class KodiClient: ObservableObject {
     }
 
     func fastForward() {
+        guard let playerID = activePlayerID else { return }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.Seek",
@@ -204,6 +239,8 @@ class KodiClient: ObservableObject {
     }
 
     func stopPlayback() {
+        guard let playerID = activePlayerID else { return }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.Stop",
@@ -213,6 +250,13 @@ class KodiClient: ObservableObject {
         
         makeKodiRequest(with: body) { data in
             print("Playback stopped:", data)
+            DispatchQueue.main.async {
+                self.activePlayerID = nil
+                self.totalDuration = 0.0
+                self.playbackPosition = 0.0
+                self.currentMovieTitle = "Kodi Remote"
+                self.currentThumbnail = nil
+            }
         }
     }
 
@@ -229,6 +273,8 @@ class KodiClient: ObservableObject {
     }
     
     func fetchCurrentItemDetails() {
+        guard let playerID = activePlayerID else { return }
+        
         let body: [String: Any] = [
             "jsonrpc": "2.0",
             "method": "Player.GetItem",
@@ -258,5 +304,179 @@ class KodiClient: ObservableObject {
                 }
             }
         }
+    }
+    
+    // MARK: - Active Player Detection
+    
+    func fetchActivePlayers() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Player.GetActivePlayers",
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            if let result = data["result"] as? [[String: Any]],
+               let firstPlayer = result.first,
+               let playerID = firstPlayer["playerid"] as? Int {
+                DispatchQueue.main.async {
+                    self.activePlayerID = playerID
+                    self.isConnected = true
+                    // Once we have an active player, fetch playback info
+                    self.fetchPlaybackInfo()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.activePlayerID = nil
+                    self.totalDuration = 0.0
+                    self.playbackPosition = 0.0
+                    self.currentMovieTitle = "Kodi Remote"
+                    self.currentThumbnail = nil
+                }
+            }
+        }
+    }
+    
+    // MARK: - Volume Controls
+    
+    func setVolume(_ volume: Int) {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Application.SetVolume",
+            "params": ["volume": volume],
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("Volume set to \(volume):", data)
+        }
+    }
+    
+    func volumeUp() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Application.SetVolume",
+            "params": ["volume": "increment"],
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("Volume increased:", data)
+        }
+    }
+    
+    func volumeDown() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Application.SetVolume",
+            "params": ["volume": "decrement"],
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("Volume decreased:", data)
+        }
+    }
+    
+    func toggleMute() {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Application.SetMute",
+            "params": ["mute": "toggle"],
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("Mute toggled:", data)
+        }
+    }
+    
+    // MARK: - Navigation Actions
+    
+    func sendInputAction(_ action: InputAction) {
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "Input." + action.rawValue,
+            "id": 1
+        ]
+        
+        makeKodiRequest(with: body) { data in
+            print("\(action.rawValue) action sent:", data)
+        }
+    }
+    
+    // MARK: - Connection Testing
+    
+    func testConnection(completion: @escaping (Bool, String) -> Void) {
+        guard !kodiAddress.isEmpty else {
+            completion(false, "Please enter a Kodi server address")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
+        
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "method": "JSONRPC.Ping",
+            "id": 1
+        ]
+        
+        let urlString = "http://\(kodiAddress):\(port)/jsonrpc"
+        guard let url = URL(string: urlString) else {
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+            completion(false, "Invalid server address format")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 5.0
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
+            request.httpBody = jsonData
+        } catch {
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+            completion(false, "Failed to create request")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+            
+            if let error = error {
+                completion(false, "Connection failed: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                completion(false, "No response from server")
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let result = json["result"] as? String,
+                   result == "pong" {
+                    DispatchQueue.main.async {
+                        self.isConnected = true
+                    }
+                    completion(true, "Successfully connected to Kodi!")
+                } else {
+                    completion(false, "Invalid response from server")
+                }
+            } catch {
+                completion(false, "Failed to parse response")
+            }
+        }.resume()
     }
 }

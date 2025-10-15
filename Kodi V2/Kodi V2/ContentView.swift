@@ -4,13 +4,15 @@ struct ContentView: View {
     @StateObject private var kodiClient = KodiClient()
     @State private var isDraggingSlider = false
     @State private var timer: Timer? = nil
-    @State private var isShowingSettings = false // State for showing the settings view
+    @State private var isShowingSettings = false
+    @State private var showVolumeControls = false
 
     var body: some View {
         ZStack {
             // Background image
             if let thumbnail = kodiClient.currentThumbnail,
-               let thumbnailURL = URL(string: "http://10.0.1.119:8080/image/\(thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")") {
+               !kodiClient.kodiAddress.isEmpty,
+               let thumbnailURL = URL(string: "http://\(kodiClient.kodiAddress):\(kodiClient.port)/image/\(thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")") {
                 AsyncImage(url: thumbnailURL) { image in
                     image
                         .resizable()
@@ -33,34 +35,91 @@ struct ContentView: View {
                 Spacer()
                     .frame(height: 10)
                 HStack {
-                    Text(kodiClient.currentMovieTitle)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.top, 40)
-                    Spacer()
-                    Button(action: {
-                        isShowingSettings.toggle() // Toggle settings view
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(kodiClient.currentMovieTitle)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(.white)
-                            .padding()
-                            .background(Color.gray.opacity(0.7))
-                            .clipShape(Circle())
+                        
+                        // Connection status indicator
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(kodiClient.isConnected ? Color.green : Color.red)
+                                .frame(width: 8, height: 8)
+                            Text(kodiClient.isConnected ? "Connected" : "Disconnected")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+                    .padding(.top, 40)
+                    
+                    Spacer()
+                    
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            performHaptic(.light)
+                            isShowingSettings.toggle()
+                        }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.gray.opacity(0.7))
+                                .clipShape(Circle())
+                        }
+                        
+                        Button(action: {
+                            performHaptic(.light)
+                            showVolumeControls.toggle()
+                        }) {
+                            Image(systemName: showVolumeControls ? "speaker.wave.3.fill" : "speaker.wave.2.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(showVolumeControls ? Color.blue.opacity(0.7) : Color.gray.opacity(0.7))
+                                .clipShape(Circle())
+                        }
                     }
                 }
                 .padding(.horizontal)
 
                 Spacer()
+                
+                // Volume controls (conditional)
+                if showVolumeControls {
+                    HStack(spacing: 20) {
+                        ControlButton(imageName: "speaker.fill", action: {
+                            performHaptic(.medium)
+                            kodiClient.toggleMute()
+                        }, size: 50)
+                        ControlButton(imageName: "minus", action: {
+                            performHaptic(.light)
+                            kodiClient.volumeDown()
+                        }, size: 50)
+                        ControlButton(imageName: "plus", action: {
+                            performHaptic(.light)
+                            kodiClient.volumeUp()
+                        }, size: 50)
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
 
                 VStack(spacing: 20) {
-                    ControlButton(imageName: "chevron.up", action: { kodiClient.sendDirection(.up) })
+                    ControlButton(imageName: "chevron.up", action: {
+                        performHaptic(.light)
+                        kodiClient.sendDirection(.up)
+                    })
 
                     HStack(spacing: 40) {
-                        ControlButton(imageName: "chevron.left", action: { kodiClient.sendDirection(.left) })
+                        ControlButton(imageName: "chevron.left", action: {
+                            performHaptic(.light)
+                            kodiClient.sendDirection(.left)
+                        })
 
-                        Button(action: { kodiClient.sendSelectAction() }) {
+                        Button(action: {
+                            performHaptic(.medium)
+                            kodiClient.sendSelectAction()
+                        }) {
                             Circle()
                                 .fill(Color.blue.opacity(0.2))
                                 .frame(width: 60, height: 60)
@@ -72,16 +131,47 @@ struct ContentView: View {
                                 .shadow(radius: 5)
                         }
 
-                        ControlButton(imageName: "chevron.right", action: { kodiClient.sendDirection(.right) })
+                        ControlButton(imageName: "chevron.right", action: {
+                            performHaptic(.light)
+                            kodiClient.sendDirection(.right)
+                        })
                     }
 
-                    ControlButton(imageName: "chevron.down", action: { kodiClient.sendDirection(.down) })
+                    ControlButton(imageName: "chevron.down", action: {
+                        performHaptic(.light)
+                        kodiClient.sendDirection(.down)
+                    })
+                }
+                
+                // Navigation buttons (Back, Home)
+                HStack(spacing: 20) {
+                    ControlButton(imageName: "chevron.backward", action: {
+                        performHaptic(.medium)
+                        kodiClient.sendInputAction(.back)
+                    }, size: 50)
+                    ControlButton(imageName: "house.fill", action: {
+                        performHaptic(.medium)
+                        kodiClient.sendInputAction(.home)
+                    }, size: 50)
+                    ControlButton(imageName: "list.bullet", action: {
+                        performHaptic(.medium)
+                        kodiClient.sendInputAction(.contextMenu)
+                    }, size: 50)
                 }
 
                 Spacer()
 
                 VStack(spacing: 10) {
-                    if kodiClient.totalDuration > 0 {
+                    if kodiClient.isLoading {
+                        HStack {
+                            ProgressView()
+                                .tint(.white)
+                            Text("Loading...")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 20)
+                    } else if kodiClient.totalDuration > 0 {
                         HStack {
                             Text(formatTime(kodiClient.playbackPosition))
                                 .font(.caption)
@@ -99,17 +189,40 @@ struct ContentView: View {
                             onEditingChanged: { editing in
                                 isDraggingSlider = editing
                                 if !editing {
+                                    performHaptic(.light)
                                     kodiClient.setKodiPlaybackPosition(kodiClient.playbackPosition)
                                 }
                             }
                         )
                         .tint(.blue)
                         .padding(.horizontal, 20)
+                    } else if kodiClient.kodiAddress.isEmpty {
+                        VStack(spacing: 8) {
+                            Image(systemName: "network.slash")
+                                .font(.largeTitle)
+                                .foregroundColor(.gray)
+                            Text("No server configured")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            Button(action: {
+                                isShowingSettings = true
+                            }) {
+                                Text("Configure Server")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.horizontal, 20)
                     } else {
-                        Text("No playback information available")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal, 20)
+                        VStack(spacing: 8) {
+                            Image(systemName: "play.slash")
+                                .font(.largeTitle)
+                                .foregroundColor(.gray)
+                            Text("No active playback")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.horizontal, 20)
                     }
                 }
                 .onAppear {
@@ -120,10 +233,22 @@ struct ContentView: View {
                 }
 
                 HStack(spacing: 20) {
-                    ControlButton(imageName: "backward.fill", action: { kodiClient.rewind() })
-                    ControlButton(imageName: "playpause.fill", action: { kodiClient.togglePlayPause() })
-                    ControlButton(imageName: "stop.fill", action: { kodiClient.stopPlayback() })
-                    ControlButton(imageName: "forward.fill", action: { kodiClient.fastForward() })
+                    ControlButton(imageName: "backward.fill", action: {
+                        performHaptic(.medium)
+                        kodiClient.rewind()
+                    })
+                    ControlButton(imageName: "playpause.fill", action: {
+                        performHaptic(.medium)
+                        kodiClient.togglePlayPause()
+                    })
+                    ControlButton(imageName: "stop.fill", action: {
+                        performHaptic(.heavy)
+                        kodiClient.stopPlayback()
+                    })
+                    ControlButton(imageName: "forward.fill", action: {
+                        performHaptic(.medium)
+                        kodiClient.fastForward()
+                    })
                 }
                 .padding(.bottom, 20)
             }
@@ -137,11 +262,15 @@ struct ContentView: View {
         }
         .alert(isPresented: $kodiClient.showErrorAlert) {
             Alert(
-                title: Text("Error"),
-                message: Text(kodiClient.errorMessage),
-                dismissButton: .default(Text("OK"))
+                title: Text("Connection Error"),
+                message: Text(kodiClient.errorMessage + "\n\nPlease check your server settings."),
+                primaryButton: .default(Text("Settings")) {
+                    isShowingSettings = true
+                },
+                secondaryButton: .cancel(Text("Dismiss"))
             )
         }
+        .animation(.spring(), value: showVolumeControls)
     }
 
     func formatTime(_ seconds: Double) -> String {
@@ -149,6 +278,11 @@ struct ContentView: View {
         let minutes = (Int(seconds) % 3600) / 60
         let secs = Int(seconds) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+    }
+    
+    func performHaptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.impactOccurred()
     }
 
     func startTimer() {
@@ -168,13 +302,14 @@ struct ContentView: View {
 struct ControlButton: View {
     let imageName: String
     let action: () -> Void
+    var size: CGFloat = 70
     
     var body: some View {
         Button(action: action) {
             Image(systemName: imageName)
-                .font(.title)
+                .font(size < 60 ? .title2 : .title)
                 .foregroundColor(.white)
-                .frame(width: 70, height: 70)
+                .frame(width: size, height: size)
                 .background(Color.blue)
                 .clipShape(Circle())
                 .shadow(radius: 5)

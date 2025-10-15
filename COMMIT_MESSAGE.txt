@@ -1,0 +1,36 @@
+feat: Major improvements to Kodi Remote v2.0
+
+This update transforms the app with critical fixes, new features, and improved UX.
+
+🔴 Critical Fixes:
+- Fix hardcoded IP address in ContentView (now uses dynamic kodiAddress)
+- Add settings persistence (loadSettings called in init)
+- Replace force unwrapping with safe optional handling
+- Implement dynamic player detection (fetchActivePlayers)
+- Fix incorrect @State usage in ObservableObject
+
+✨ New Features:
+- Volume controls (up/down/mute) with toggleable panel
+- Navigation buttons (Back, Home, Context Menu)
+- Haptic feedback on all button presses
+- Connection testing before saving settings
+- Real-time connection status indicator
+- Input validation for IP address and port
+
+💫 UX Improvements:
+- Loading states with progress indicators
+- Empty states with helpful messages
+- Improved error handling with actionable alerts
+- Better visual feedback and animations
+- Connection status (green/red indicator)
+
+📊 Changes:
+- Modified: KodiClient.swift (+256 lines)
+- Modified: ContentView.swift (+205 lines)
+- Modified: SettingsView.swift (+124 lines)
+- Added: README.md (comprehensive documentation)
+- Added: USER_GUIDE.md (complete user manual)
+- Added: IMPROVEMENTS.md (detailed changelog)
+
+All changes tested with zero linter errors.
+
