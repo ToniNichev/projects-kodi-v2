@@ -33,9 +33,6 @@ struct ContentView: View {
 
             // Foreground content
             VStack(spacing: 30) {
-                Spacer()
-                    .frame(height: 20)
-                
                 // Header with title and metadata
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 12) {
@@ -67,7 +64,6 @@ struct ContentView: View {
                         // Connection status
                         ConnectionBadge(isConnected: kodiClient.isConnected)
                     }
-                    .padding(.top, 40)
                     
                     Spacer()
                     
@@ -125,8 +121,8 @@ struct ContentView: View {
                             )
                         }
                     }
-                    .padding(.trailing, 8)
                 }
+                .padding(.top, 60)  // Safe area + spacing
                 .padding(.horizontal, 20)
 
                 Spacer()
