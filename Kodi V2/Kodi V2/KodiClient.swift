@@ -169,6 +169,9 @@ class KodiClient: ObservableObject {
                 if totalDurationSeconds > 0 {
                     self.fetchCurrentItemDetails()
                 }
+                
+                // Share data with widget
+                self.updateSharedPlaybackData()
             }
         }
     }
@@ -403,6 +406,36 @@ class KodiClient: ObservableObject {
         makeKodiRequest(with: body) { data in
             print("\(action.rawValue) action sent:", data)
         }
+    }
+    
+    // MARK: - Widget Data Sharing
+    
+    func updateSharedPlaybackData() {
+        guard totalDuration > 0 else {
+            // No playback, clear widget data
+            SharedDataManager.shared.clearPlaybackData()
+            return
+        }
+        
+        let thumbnailURL: String?
+        if let thumbnail = currentThumbnail, !kodiAddress.isEmpty {
+            thumbnailURL = "http://\(kodiAddress):\(port)/image/\(thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")"
+        } else {
+            thumbnailURL = nil
+        }
+        
+        let playbackData = PlaybackData(
+            title: currentMovieTitle,
+            year: currentYear,
+            genre: currentGenre != "Unknown Genre" ? currentGenre : nil,
+            currentTime: playbackPosition,
+            totalTime: totalDuration,
+            isPlaying: true, // We can enhance this later with actual play/pause state
+            thumbnailURL: thumbnailURL,
+            lastUpdated: Date()
+        )
+        
+        SharedDataManager.shared.savePlaybackData(playbackData)
     }
     
     // MARK: - Connection Testing
