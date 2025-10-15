@@ -45,6 +45,17 @@ struct SettingsView: View {
                     .disabled(isTesting || tempKodiAddress.isEmpty || tempPort.isEmpty)
                 }
                 
+                Section(header: Text("Cache Management")) {
+                    Button(action: clearImageCache) {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Clear Image Cache")
+                            Spacer()
+                        }
+                        .foregroundColor(.red)
+                    }
+                }
+                
                 Section {
                     Button("Save") {
                         saveSettings()
@@ -138,6 +149,13 @@ struct SettingsView: View {
         kodiClient.saveSettings()
         kodiClient.fetchActivePlayers() // Refresh connection with new settings
         presentationMode.wrappedValue.dismiss()
+    }
+    
+    private func clearImageCache() {
+        ImageCache.shared.clearCache()
+        alertTitle = "Cache Cleared"
+        alertMessage = "All cached images have been removed. Thumbnails will reload from the server."
+        showAlert = true
     }
 }
 

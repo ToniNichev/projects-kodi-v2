@@ -9,11 +9,11 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Background image
+            // Background image with caching
             if let thumbnail = kodiClient.currentThumbnail,
                !kodiClient.kodiAddress.isEmpty,
                let thumbnailURL = URL(string: "http://\(kodiClient.kodiAddress):\(kodiClient.port)/image/\(thumbnail.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")") {
-                AsyncImage(url: thumbnailURL) { image in
+                CachedAsyncImage(url: thumbnailURL) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
